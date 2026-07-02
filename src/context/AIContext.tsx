@@ -1,4 +1,5 @@
-import { createContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useState, useCallback } from 'react';
+import type { ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export type MessageRole = 'user' | 'assistant' | 'system';
