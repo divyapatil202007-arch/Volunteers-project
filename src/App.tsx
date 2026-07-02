@@ -9,13 +9,16 @@ import { Signup } from './pages/auth/Signup';
 import { Certificates } from './pages/certificates/Certificates';
 import { Settings } from './pages/settings/Settings';
 import { AIProvider } from './context/AIContext';
+import { ResumeProvider } from './context/ResumeContext';
+import { ResumeAnalyzer } from './pages/resume/ResumeAnalyzer';
 
 function App() {
   return (
     <AIProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
+      <ResumeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
@@ -25,13 +28,15 @@ function App() {
             <Route path="/events" element={<Events />} />
             <Route path="/events/create" element={<CreateEvent />} />
             <Route path="/certificates" element={<Certificates />} />
+            <Route path="/analyzer" element={<ResumeAnalyzer />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/hours" element={<div className="p-8">Volunteer Hours Page</div>} />
             <Route path="/messages" element={<div className="p-8">Messages Page</div>} />
           </Route>
         </Routes>
       </BrowserRouter>
-    </AIProvider>
+    </ResumeProvider>
+  </AIProvider>
   );
 }
 
