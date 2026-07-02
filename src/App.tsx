@@ -11,6 +11,7 @@ import { Settings } from './pages/settings/Settings';
 import { AIProvider } from './context/AIContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { ResumeAnalyzer } from './pages/resume/ResumeAnalyzer';
+import { Messages } from './pages/messages/Messages';
 
 function App() {
   return (
@@ -30,8 +31,8 @@ function App() {
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/analyzer" element={<ResumeAnalyzer />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/hours" element={<div className="p-8">Volunteer Hours Page</div>} />
-            <Route path="/messages" element={<div className="p-8">Messages Page</div>} />
+            <Route path="/hours" element={<div className="p-8 text-white">Volunteer Hours Page</div>} />
+            <Route path="/messages" element={<Messages />} />
           </Route>
         </Routes>
       </BrowserRouter>

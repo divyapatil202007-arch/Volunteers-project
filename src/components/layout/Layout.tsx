@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -15,7 +15,9 @@ import {
   Moon,
   Sun,
   X,
-  LogOut
+  LogOut,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import styles from './Layout.module.css';
@@ -33,12 +35,41 @@ const NAV_ITEMS = [
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
+const MOCK_NOTIFICATIONS = [
+  { id: '1', title: 'New Event Match!', desc: 'You have a 95% match for "Teaching Program for Underprivileged Youth".', time: '10 mins ago', type: 'success', unread: true },
+  { id: '2', title: 'Certificate Approved', desc: 'Your "Summer Workshop" certificate was verified.', time: '2 hours ago', type: 'info', unread: true },
+  { id: '3', title: 'Application Update', desc: 'Green Earth NGO viewed your application.', time: '1 day ago', type: 'info', unread: false },
+];
+
 export function Layout() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setCollapsed] = useState(false);
+  const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    }
+    if (isNotificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isNotificationsOpen]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, unread: false })));
+  };
 
   const handleLogout = () => {
     // Basic logout logic: redirect to login
@@ -116,14 +147,75 @@ export function Layout() {
             </div>
           </div>
 
-          <div className={styles.navRight}>
+          <div className={styles.navRight} ref={notificationsRef}>
             <Button variant="ghost" size="sm" onClick={toggleTheme}>
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </Button>
-            <Button variant="ghost" size="sm" className={styles.bellBtn}>
-              <Bell size={20} />
-              <span className={cn(styles.bellBadge, "animate-pulse-glow")} />
-            </Button>
+            
+            <div className="relative">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={styles.bellBtn}
+                onClick={() => setNotificationsOpen(!isNotificationsOpen)}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className={cn(styles.bellBadge, "animate-pulse-glow")} />
+                )}
+              </Button>
+
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className={styles.notificationsDropdown}
+                  >
+                    <div className={styles.notificationsHeader}>
+                      <h3>Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button onClick={markAllAsRead} className={styles.markReadBtn}>
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    <div className={styles.notificationsList}>
+                      {notifications.length > 0 ? (
+                        notifications.map((notif) => (
+                          <div 
+                            key={notif.id} 
+                            className={cn(styles.notificationItem, notif.unread && styles.unread)}
+                            onClick={() => {
+                              setNotifications(notifications.map(n => n.id === notif.id ? { ...n, unread: false } : n));
+                            }}
+                          >
+                            <div className={styles.notificationIcon}>
+                              {notif.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                            </div>
+                            <div className={styles.notificationContent}>
+                              <div className={styles.notificationTitle}>
+                                {notif.title}
+                                {notif.unread && <span className={styles.unreadDot} />}
+                              </div>
+                              <p className={styles.notificationDesc}>{notif.desc}</p>
+                              <span className={styles.notificationTime}>{notif.time}</span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className={styles.notificationsEmpty}>
+                          No new notifications
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className={styles.profileAvatar}>
               DP
             </div>
