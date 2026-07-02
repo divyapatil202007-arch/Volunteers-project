@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -13,7 +13,8 @@ import {
   Search,
   Moon,
   Sun,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import styles from './Layout.module.css';
@@ -35,6 +36,12 @@ export function Layout() {
   const [isCollapsed, setCollapsed] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Basic logout logic: redirect to login
+    navigate('/login');
+  };
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -118,6 +125,9 @@ export function Layout() {
             <div className={styles.profileAvatar}>
               DP
             </div>
+            <Button variant="ghost" size="sm" onClick={handleLogout} title="Log out">
+              <LogOut size={20} />
+            </Button>
           </div>
         </header>
 
