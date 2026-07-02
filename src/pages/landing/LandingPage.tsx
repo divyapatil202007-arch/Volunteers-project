@@ -11,7 +11,6 @@ export function LandingPage() {
     <div className={styles.landing}>
       <nav className={styles.navbar + ' glass'}>
         <div className={styles.logo}>
-          <div className={styles.logoIcon}>V</div>
           VolunteerAI
         </div>
         <div className={styles.navLinks}>

@@ -24,7 +24,6 @@ export function Login() {
         transition={{ duration: 0.3 }}
       >
         <div className={styles.authHeader}>
-          <div className={styles.logo}>V</div>
           <h1 className={styles.title}>Welcome back</h1>
           <p className={styles.subtitle}>Enter your details to sign in to your account</p>
         </div>

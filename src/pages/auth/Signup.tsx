@@ -26,7 +26,6 @@ export function Signup() {
         transition={{ duration: 0.4 }}
       >
         <div className={styles.authHeader}>
-          <div className={styles.logo}>V</div>
           <h1 className={styles.title}>Create an account</h1>
           <p className={styles.subtitle}>Join VolunteerAI and start making an impact</p>
         </div>
