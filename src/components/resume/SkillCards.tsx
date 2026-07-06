@@ -1,30 +1,32 @@
 import { motion } from 'framer-motion';
 import { useResume } from '../../hooks/useResume';
+import styles from '../../pages/resume/ResumeAnalyzer.module.css';
 
 export function SkillCards() {
   const { resumeData } = useResume();
   const skills = resumeData?.skills || [];
 
   return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6 backdrop-blur-sm h-full">
-      <h3 className="text-lg font-medium text-slate-300 mb-4">Extracted Skills</h3>
-      <div className="space-y-4">
+    <div className={styles.glassCard}>
+      <h3 className={styles.cardTitle}>Extracted Skills</h3>
+      <div className={styles.skillsList}>
         {skills.map((skill, index) => (
           <motion.div 
             key={skill.name}
+            className={styles.skillItem}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 + index * 0.1 }}
           >
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-white font-medium">{skill.name}</span>
-              <span className="text-slate-400">{skill.confidence}%</span>
+            <div className={styles.skillHeader}>
+              <span className={styles.skillName}>{skill.name}</span>
+              <span className={styles.skillPercent}>{skill.confidence}%</span>
             </div>
-            <div className="h-2 w-full bg-slate-700 rounded-full overflow-hidden">
+            <div className={styles.skillTrack}>
               <motion.div
-                className={`h-full rounded-full ${
-                  skill.category === 'technical' ? 'bg-primary' :
-                  skill.category === 'soft' ? 'bg-accent' : 'bg-emerald-500'
+                className={`${styles.skillFill} ${
+                  skill.category === 'technical' ? styles.skillTech :
+                  skill.category === 'soft' ? styles.skillSoft : styles.skillDomain
                 }`}
                 initial={{ width: 0 }}
                 animate={{ width: `${skill.confidence}%` }}

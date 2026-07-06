@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { useResume } from '../../hooks/useResume';
+import styles from '../../pages/resume/ResumeAnalyzer.module.css';
 
 export function SkillRadarChart() {
   const { resumeData } = useResume();
@@ -14,18 +15,18 @@ export function SkillRadarChart() {
   }));
 
   return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6 backdrop-blur-sm h-[320px] flex flex-col">
-      <h3 className="text-lg font-medium text-slate-300 mb-2">Skill Radar</h3>
+    <div className={`${styles.glassCard} ${styles.chartContainer}`}>
+      <h3 className={styles.cardTitle}>Skill Radar</h3>
       <motion.div 
-        className="flex-1 w-full"
+        className={styles.chartWrapper}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.8, duration: 0.6 }}
       >
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-            <PolarGrid stroke="rgba(255,255,255,0.1)" />
-            <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 11 }} />
+            <PolarGrid stroke="var(--border-color)" />
+            <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
             <Radar
               name="Skills"

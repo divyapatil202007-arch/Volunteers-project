@@ -7,21 +7,22 @@ import { SkillCards } from '../../components/resume/SkillCards';
 import { SkillRadarChart } from '../../components/resume/SkillRadarChart';
 import { AIInsights } from '../../components/resume/AIInsights';
 import { RecommendationCards } from '../../components/resume/RecommendationCards';
+import styles from './ResumeAnalyzer.module.css';
 
 export function ResumeAnalyzer() {
   const { isUploading, resumeData, resetAnalyzer } = useResume();
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className={styles.container}>
+      <div className={styles.header}>
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">AI Resume & Certificate Analyzer</h1>
-          <p className="text-slate-400">Upload your documents and let AI build your perfect volunteer profile automatically.</p>
+          <h1 className={styles.title}>AI Resume & Certificate Analyzer</h1>
+          <p className={styles.subtitle}>Upload your documents and let AI build your perfect volunteer profile automatically.</p>
         </div>
         {resumeData && (
           <button 
             onClick={resetAnalyzer}
-            className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-700"
+            className="px-4 py-2 bg-[var(--bg-card)] text-[var(--text-main)] rounded-lg hover:bg-[var(--border-color)] transition-colors border border-[var(--border-color)]"
           >
             Upload New Document
           </button>
@@ -40,12 +41,13 @@ export function ResumeAnalyzer() {
 
       {resumeData && !isUploading && (
         <motion.div 
-          className="space-y-6"
+          className={styles.gridTop}
+          style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           {/* Top Row: Score, Skills, Radar */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className={styles.gridTop}>
             <ResumeScore />
             <SkillCards />
             <SkillRadarChart />

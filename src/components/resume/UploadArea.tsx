@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { UploadCloud, FileText } from 'lucide-react';
 import { useResume } from '../../hooks/useResume';
+import styles from '../../pages/resume/ResumeAnalyzer.module.css';
 
 export function UploadArea() {
   const { handleFileUpload } = useResume();
@@ -34,7 +35,7 @@ export function UploadArea() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className={styles.uploadWrapper}>
       <motion.div
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -42,43 +43,37 @@ export function UploadArea() {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`
-          relative overflow-hidden cursor-pointer rounded-2xl border-2 border-dashed
-          transition-all duration-300 flex flex-col items-center justify-center p-12
-          ${isDragOver 
-            ? 'border-primary bg-primary/10 shadow-[0_0_30px_rgba(37,99,235,0.2)]' 
-            : 'border-slate-600 bg-slate-800/50 hover:bg-slate-800/80 hover:border-slate-500'}
-        `}
+        className={`${styles.uploadBox} ${isDragOver ? styles.dragOver : ''}`}
       >
         <input 
           type="file" 
           ref={fileInputRef} 
           onChange={handleFileSelect}
-          className="hidden" 
+          className={styles.fileInput} 
           accept=".pdf,.docx,.png,.jpg,.jpeg"
         />
         
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          className="bg-gradient-to-br from-primary/20 to-accent/20 p-6 rounded-full mb-6"
+          className={styles.uploadIconWrapper}
         >
-          <UploadCloud size={48} className="text-primary" />
+          <UploadCloud size={48} />
         </motion.div>
         
-        <h3 className="text-2xl font-bold text-white mb-2">Upload Resume or Certificate</h3>
-        <p className="text-slate-400 text-center mb-6 max-w-md">
+        <h3 className={styles.uploadTitle}>Upload Resume or Certificate</h3>
+        <p className={styles.uploadDesc}>
           Drag and drop your document here, or click to browse. We support PDF, DOCX, and images.
         </p>
 
-        <div className="flex gap-4 opacity-70">
-          <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700">
+        <div className={styles.supportedFormats}>
+          <div className={styles.formatTag}>
             <FileText size={16} /> PDF
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700">
+          <div className={styles.formatTag}>
             <FileText size={16} /> DOCX
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-700">
+          <div className={styles.formatTag}>
             <FileText size={16} /> Images
           </div>
         </div>

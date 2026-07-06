@@ -1,0 +1,446 @@
+/* Layout */
+.container {
+  padding: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.gridTop {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .gridTop {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gridInsights {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .gridInsights {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Glass Card Shared */
+.glassCard {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+/* Upload Area */
+.uploadWrapper {
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.uploadBox {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-color);
+  background: var(--bg-card);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.uploadBox:hover {
+  background: rgba(15, 23, 42, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.uploadBox.dragOver {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 30px rgba(37, 99, 235, 0.2);
+}
+
+.uploadIconWrapper {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(139, 92, 246, 0.2));
+  padding: 1.5rem;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.uploadTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.uploadDesc {
+  color: var(--text-muted);
+  max-width: 28rem;
+  margin-bottom: 1.5rem;
+}
+
+.supportedFormats {
+  display: flex;
+  gap: 1rem;
+  opacity: 0.7;
+}
+
+.formatTag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-main);
+}
+
+.fileInput {
+  display: none;
+}
+
+/* Upload Progress */
+.progressWrapper {
+  width: 100%;
+  max-width: 28rem;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progressBarContainer {
+  width: 100%;
+  position: relative;
+  height: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.progressBarFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.progressShimmer {
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-20deg);
+}
+
+.progressStatus {
+  color: var(--text-main);
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+/* Resume Score */
+.scoreContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.scoreCircleWrapper {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scoreSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.scoreTrack {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 12;
+}
+
+.scoreFill {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.scoreContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scoreValue {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.scoreLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Skill Cards */
+.skillsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skillItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.skillHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.skillName {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.skillPercent {
+  color: var(--text-muted);
+}
+
+.skillTrack {
+  height: 0.5rem;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.skillFill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.skillTech { background: var(--primary); }
+.skillSoft { background: var(--accent); }
+.skillDomain { background: #10B981; }
+
+/* Radar Chart */
+.chartContainer {
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartWrapper {
+  flex: 1;
+  width: 100%;
+}
+
+/* AI Insights */
+.insightBox {
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.insightHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.insightList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.insightItem {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.insightDot {
+  font-weight: bold;
+}
+
+/* Insight Colors */
+.insightSuccess {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+.insightSuccess .insightHeader { color: #10B981; }
+.insightSuccess .insightDot { color: #10B981; }
+
+.insightDanger {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.2);
+}
+.insightDanger .insightHeader { color: #F43F5E; }
+.insightDanger .insightDot { color: #F43F5E; }
+
+.insightWarning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+.insightWarning .insightHeader { color: #F59E0B; }
+.insightWarning .insightDot { color: #F59E0B; }
+
+/* Recommendations */
+.recHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.recTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.recCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  transition: all var(--transition-fast);
+}
+
+.recCard:hover {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.recIcon {
+  padding: 0.5rem;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary);
+  border-radius: var(--radius-md);
+}
+
+.recBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  border-radius: 9999px;
+}
+
+.recEventTitle {
+  color: var(--text-main);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.recDesc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  height: 2.5rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.recButton {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recButtonIcon {
+  transition: transform var(--transition-fast);
+}
+
+.recButton:hover .recButtonIcon {
+  transform: translateX(4px);
+}
