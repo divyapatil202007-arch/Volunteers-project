@@ -107,7 +107,7 @@ export function Messages() {
 
             <div className={styles.messagesArea}>
               <AnimatePresence initial={false}>
-                {activeChat.map((msg, index) => (
+                {activeChat.map((msg) => (
                   <motion.div
                     key={msg.id}
                     initial={{ opacity: 0, y: 10 }}

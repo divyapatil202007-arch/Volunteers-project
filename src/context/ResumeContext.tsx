@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useState, useCallback, type ReactNode } from 'react';
 
 export interface ExtractedSkill {
   name: string;
@@ -46,7 +46,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     setIsUploading(false);
   }, []);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (_file: File) => {
     setIsUploading(true);
     setUploadProgress(10);
     setScanStatus('Uploading Document...');
