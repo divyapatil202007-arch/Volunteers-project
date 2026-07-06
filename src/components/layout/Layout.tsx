@@ -48,6 +48,7 @@ export function Layout() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const notificationsRef = useRef<HTMLDivElement>(null);
   
   const location = useLocation();
@@ -55,9 +56,9 @@ export function Layout() {
 
   useEffect(() => {
     const storedEmail = localStorage.getItem('userEmail');
-    if (storedEmail) {
-      setUserEmail(storedEmail);
-    }
+    const storedName = localStorage.getItem('userName');
+    if (storedEmail) setUserEmail(storedEmail);
+    if (storedName) setUserName(storedName);
   }, []);
 
   // Close notifications when clicking outside
@@ -81,6 +82,9 @@ export function Layout() {
 
   const handleLogout = () => {
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('token');
     navigate('/login');
   };
 
@@ -90,8 +94,15 @@ export function Layout() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  // Helper to get initials from email
-  const getInitials = (email: string) => {
+  // Helper to get initials from name or email
+  const getInitials = (name: string, email: string) => {
+    if (name) {
+      const parts = name.trim().split(' ');
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    }
     if (!email) return 'U';
     const namePart = email.split('@')[0];
     if (namePart.includes('.')) {
@@ -235,8 +246,8 @@ export function Layout() {
               </AnimatePresence>
             </div>
 
-            <div className={styles.profileAvatar} title={userEmail}>
-              {getInitials(userEmail)}
+            <div className={styles.profileAvatar} title={userName || userEmail}>
+              {getInitials(userName, userEmail)}
             </div>
             <Button variant="ghost" size="sm" onClick={handleLogout} title="Log out">
               <LogOut size={20} />

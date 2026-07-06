@@ -9,10 +9,43 @@ import styles from './Auth.module.css';
 export function Signup() {
   const navigate = useNavigate();
   const [role, setRole] = useState<'volunteer' | 'ngo'>('volunteer');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      if (data.data && data.data.user) {
+        localStorage.setItem('userEmail', data.data.user.email);
+        localStorage.setItem('userName', data.data.user.name);
+        localStorage.setItem('userRole', data.data.user.role);
+        localStorage.setItem('token', data.data.token);
+      }
+      
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,9 +83,16 @@ export function Signup() {
         </div>
 
         <form className={styles.form} onSubmit={handleSignup}>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-md mb-2">
+              {error}
+            </div>
+          )}
           <Input 
             label="Full Name" 
             type="text" 
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="John Doe"
             icon={<User size={18} />}
             required
@@ -60,6 +100,8 @@ export function Signup() {
           <Input 
             label="Email" 
             type="email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="john@example.com"
             icon={<Mail size={18} />}
             required
@@ -67,12 +109,14 @@ export function Signup() {
           <Input 
             label="Password" 
             type="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             icon={<Lock size={18} />}
             required
           />
           
-          <Button type="submit" size="lg" className={styles.submitBtn}>
+          <Button type="submit" size="lg" className={styles.submitBtn} isLoading={isLoading}>
             Create account
           </Button>
         </form>

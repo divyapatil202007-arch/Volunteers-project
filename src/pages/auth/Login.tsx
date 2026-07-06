@@ -9,13 +9,42 @@ import styles from './Auth.module.css';
 export function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      localStorage.setItem('userEmail', email);
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Save user info and token
+      if (data.data && data.data.user) {
+        localStorage.setItem('userEmail', data.data.user.email);
+        localStorage.setItem('userName', data.data.user.name);
+        localStorage.setItem('userRole', data.data.user.role);
+        localStorage.setItem('token', data.data.token);
+      }
+      
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-    navigate('/dashboard');
   };
 
   return (
@@ -34,6 +63,11 @@ export function Login() {
         </div>
 
         <form className={styles.form} onSubmit={handleLogin}>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-md mb-2">
+              {error}
+            </div>
+          )}
           <Input 
             label="Email" 
             type="email" 
@@ -47,6 +81,8 @@ export function Login() {
             <Input 
               label="Password" 
               type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               icon={<Lock size={18} />}
               required
@@ -54,7 +90,7 @@ export function Login() {
             <a href="#" className={styles.forgotPassword}>Forgot password?</a>
           </div>
           
-          <Button type="submit" size="lg" className={styles.submitBtn}>
+          <Button type="submit" size="lg" className={styles.submitBtn} isLoading={isLoading}>
             Sign in
           </Button>
         </form>
