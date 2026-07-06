@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Globe, Smartphone } from 'lucide-react';
@@ -7,9 +8,13 @@ import styles from './Auth.module.css';
 
 export function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (email) {
+      localStorage.setItem('userEmail', email);
+    }
     navigate('/dashboard');
   };
 
@@ -32,6 +37,8 @@ export function Login() {
           <Input 
             label="Email" 
             type="email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="john@example.com"
             icon={<Mail size={18} />}
             required

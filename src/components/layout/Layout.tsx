@@ -47,10 +47,18 @@ export function Layout() {
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [userEmail, setUserEmail] = useState('');
   const notificationsRef = useRef<HTMLDivElement>(null);
   
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('userEmail');
+    if (storedEmail) {
+      setUserEmail(storedEmail);
+    }
+  }, []);
 
   // Close notifications when clicking outside
   useEffect(() => {
@@ -72,7 +80,7 @@ export function Layout() {
   };
 
   const handleLogout = () => {
-    // Basic logout logic: redirect to login
+    localStorage.removeItem('userEmail');
     navigate('/login');
   };
 
@@ -80,6 +88,17 @@ export function Layout() {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  // Helper to get initials from email
+  const getInitials = (email: string) => {
+    if (!email) return 'U';
+    const namePart = email.split('@')[0];
+    if (namePart.includes('.')) {
+      const parts = namePart.split('.');
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return namePart.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -216,8 +235,8 @@ export function Layout() {
               </AnimatePresence>
             </div>
 
-            <div className={styles.profileAvatar}>
-              DP
+            <div className={styles.profileAvatar} title={userEmail}>
+              {getInitials(userEmail)}
             </div>
             <Button variant="ghost" size="sm" onClick={handleLogout} title="Log out">
               <LogOut size={20} />
