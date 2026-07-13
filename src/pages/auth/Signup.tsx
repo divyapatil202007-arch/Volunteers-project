@@ -27,10 +27,16 @@ export function Signup() {
         body: JSON.stringify({ name, email, password, role }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        throw new Error('Server encountered an error. Please check Vercel logs or database connection.');
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data?.message || 'Registration failed');
       }
 
       if (data.data && data.data.user) {
