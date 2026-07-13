@@ -13,6 +13,7 @@ import {
   Filler
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, MotionCard } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import styles from './Dashboard.module.css';
@@ -75,6 +76,8 @@ const STATS = [
 ];
 
 export function Dashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className={styles.dashboard}>
       <div className={styles.header}>
@@ -82,7 +85,7 @@ export function Dashboard() {
           <h1 className={styles.title}>Welcome back, Divya! 👋</h1>
           <p className={styles.subtitle}>Here is your volunteer impact overview.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => navigate('/matches')}>
           <Sparkles size={16} /> Find Matches
         </Button>
       </div>

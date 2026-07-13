@@ -12,6 +12,7 @@ import { AIProvider } from './context/AIContext';
 import { ResumeProvider } from './context/ResumeContext';
 import { ResumeAnalyzer } from './pages/resume/ResumeAnalyzer';
 import { Messages } from './pages/messages/Messages';
+import { MatchFlow } from './pages/matches/MatchFlow';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/matches" element={<MatchFlow />} />
           
           {/* Protected Routes inside Layout */}
           <Route element={<Layout />}>
