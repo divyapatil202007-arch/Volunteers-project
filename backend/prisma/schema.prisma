@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String            @id @default(uuid())
+  name                String            @db.VarChar(50)
+  email               String            @unique
+  password            String
+  role                String            @default("volunteer")
+  isEmailVerified     Boolean           @default(false)
+  profilePicture      String            @default("default.jpg")
+  refreshToken        String?
+  resetPasswordToken  String?
+  resetPasswordExpire DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  ngo                 NGO?
+  volunteerProfile    VolunteerProfile?
+  applications        Application[]
+}
+
+model NGO {
+  id                  String            @id @default(uuid())
+  userId              String            @unique
+  organizationName    String            @db.VarChar(100)
+  registrationNumber  String            @unique
+  description         String            @db.VarChar(1000)
+  website             String?
+  phone               String?           @db.VarChar(20)
+  address             String
+  isVerified          Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events              Event[]
+}
+
+model VolunteerProfile {
+  id              String            @id @default(uuid())
+  userId          String            @unique
+  bio             String?           @db.VarChar(500)
+  skills          String[]
+  interests       String[]
+  availability    String[]
+  languages       String[]
+  experience      String?           @db.VarChar(1000)
+  location        String            @default("")
+  volunteerHours  Int               @default(0)
+  achievements    String[]
+  badges          String[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id                String            @id @default(uuid())
+  ngoId             String
+  title             String            @db.VarChar(100)
+  description       String            @db.VarChar(1000)
+  category          String
+  requiredSkills    String[]
+  location          String
+  startDate         DateTime
+  endDate           DateTime
+  maxVolunteers     Int
+  currentVolunteers Int               @default(0)
+  status            String            @default("Draft")
+  images            String[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  ngo               NGO               @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  applications      Application[]
+}
+
+model Application {
+  id          String            @id @default(uuid())
+  eventId     String
+  volunteerId String
+  status      String            @default("Pending")
+  notes       String?           @db.VarChar(500)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  volunteer   User              @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, volunteerId])
+}

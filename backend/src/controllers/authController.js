@@ -1,12 +1,14 @@
 import { AuthService } from '../services/AuthService.js';
-import { User } from '../models/User.js';
+import { prisma } from '../config/db.js';
 
-const sendTokenResponse = (user, statusCode, res) => {
+const sendTokenResponse = async (user, statusCode, res) => {
   const { token, refreshToken } = AuthService.generateTokens(user);
 
   // Save refresh token in DB
-  user.refreshToken = refreshToken;
-  user.save({ validateBeforeSave: false });
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshToken }
+  });
 
   const options = {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
@@ -24,7 +26,7 @@ const sendTokenResponse = (user, statusCode, res) => {
         token,
         refreshToken,
         user: {
-          id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
           role: user.role
@@ -36,7 +38,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 export const register = async (req, res, next) => {
   try {
     const user = await AuthService.registerUser(req.body);
-    sendTokenResponse(user, 201, res);
+    await sendTokenResponse(user, 201, res);
   } catch (err) {
     if (err.message === 'Email already registered') {
       res.status(400);
@@ -49,7 +51,7 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await AuthService.loginUser(email, password);
-    sendTokenResponse(user, 200, res);
+    await sendTokenResponse(user, 200, res);
   } catch (err) {
     if (err.message === 'Invalid credentials') {
       res.status(401);
@@ -62,11 +64,10 @@ export const logout = async (req, res, next) => {
   try {
     // Clear refresh token in DB
     if (req.user) {
-      const user = await User.findById(req.user.id);
-      if (user) {
-        user.refreshToken = undefined;
-        await user.save({ validateBeforeSave: false });
-      }
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { refreshToken: null }
+      });
     }
 
     res.cookie('token', 'none', {
@@ -86,7 +87,15 @@ export const logout = async (req, res, next) => {
 
 export const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id }
+    });
+    
+    // Remove password before sending
+    if (user) {
+      delete user.password;
+    }
+
     res.status(200).json({
       success: true,
       message: 'User profile retrieved',

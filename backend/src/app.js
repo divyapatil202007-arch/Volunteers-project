@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import mongoSanitize from 'express-mongo-sanitize';
 import { setupSwagger } from './docs/swagger.js';
 import { errorHandler, notFoundHandler } from './middleware/errorMiddleware.js';
 
@@ -20,7 +19,7 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 }));
-app.use(mongoSanitize());
+
 
 // Standard Middleware
 app.use(express.json());

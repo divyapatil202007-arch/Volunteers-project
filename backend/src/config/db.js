@@ -1,12 +1,14 @@
-import mongoose from 'mongoose';
+import { PrismaClient } from '@prisma/client';
 import { logger } from './logger.js';
+
+export const prisma = new PrismaClient();
 
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    logger.info(`MongoDB Connected: ${conn.connection.host}`);
+    await prisma.$connect();
+    logger.info(`Supabase PostgreSQL Connected via Prisma`);
   } catch (error) {
-    logger.error(`Error connecting to MongoDB: ${error.message}`);
+    logger.error(`Error connecting to Supabase: ${error.message}`);
     throw error;
   }
 };
