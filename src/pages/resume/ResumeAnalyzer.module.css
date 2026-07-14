@@ -94,7 +94,7 @@
 }
 
 .uploadBox:hover {
-  background: var(--surface-hover);
+  background: var(--surface);
   border-color: var(--primary);
 }
 
