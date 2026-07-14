@@ -1,5 +1,5 @@
 import { AuthService } from '../services/AuthService.js';
-import { prisma } from '../config/db.js';
+// prisma import removed for hackathon mode
 
 const sendTokenResponse = async (user, statusCode, res) => {
   const { token, refreshToken } = AuthService.generateTokens(user);
