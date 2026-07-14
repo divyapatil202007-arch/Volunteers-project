@@ -11,13 +11,13 @@ export const matchPassword = async (enteredPassword, userPassword) => {
 };
 
 export const getSignedJwtToken = (userId, role) => {
-  return jwt.sign({ id: userId, role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
+  return jwt.sign({ id: userId, role }, process.env.JWT_SECRET || 'fallback_secret_for_hackathon', {
+    expiresIn: process.env.JWT_EXPIRE || '30d'
   });
 };
 
 export const getRefreshToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRE
+  return jwt.sign({ id: userId }, process.env.REFRESH_TOKEN_SECRET || 'fallback_refresh_secret', {
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRE || '30d'
   });
 };
