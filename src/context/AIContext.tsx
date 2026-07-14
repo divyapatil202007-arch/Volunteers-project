@@ -63,33 +63,40 @@ export function AIProvider({ children }: { children: ReactNode }) {
     setMessages(prev => [...prev, userMsg]);
     setIsTyping(true);
 
-    // TODO: Connect to real backend API here
-    // For now, simulate network delay and fake response
-    setTimeout(() => {
-      let aiResponse: AIMessage = {
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, history: messages })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to get response');
+      }
+
+      const aiResponse: AIMessage = {
         id: uuidv4(),
         role: 'assistant',
-        content: `I received your request: "${content}". I am simulating an AI response!`,
+        content: data.data.response,
         createdAt: new Date(),
         type: 'text'
       };
 
-      // Mock Intent Detection for UI demonstration
-      const lowerContent = content.toLowerCase();
-      if (lowerContent.includes('event')) {
-        aiResponse.content = 'Here is the event you asked about:';
-        aiResponse.type = 'event-card';
-        aiResponse.metadata = {
-          title: 'Tree Plantation Drive',
-          date: 'Aug 15, 2026',
-          location: 'Pune Central',
-          volunteers: '0/50'
-        };
-      }
-
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error: any) {
+      const errorMsg: AIMessage = {
+        id: uuidv4(),
+        role: 'assistant',
+        content: `Error: ${error.message}. Please make sure you have added your GEMINI_API_KEY to the Vercel dashboard or local .env file.`,
+        createdAt: new Date(),
+        type: 'text'
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
