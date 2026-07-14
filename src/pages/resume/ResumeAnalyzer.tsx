@@ -22,7 +22,7 @@ export function ResumeAnalyzer() {
         {resumeData && (
           <button 
             onClick={resetAnalyzer}
-            className="px-4 py-2 bg-[var(--bg-card)] text-[var(--text-main)] rounded-lg hover:bg-[var(--border-color)] transition-colors border border-[var(--border-color)]"
+            className="px-4 py-2 bg-[var(--surface)] text-[var(--text-main)] rounded-lg hover:bg-[var(--border)] transition-colors border border-[var(--border)]"
           >
             Upload New Document
           </button>
