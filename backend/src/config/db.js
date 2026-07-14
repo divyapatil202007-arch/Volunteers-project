@@ -4,20 +4,14 @@ const { Pool } = pkg;
 import { PrismaPg } from '@prisma/adapter-pg';
 import { logger } from './logger.js';
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  logger.error('CRITICAL: DATABASE_URL environment variable is missing in Vercel Settings!');
-}
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres.jaxwfomyuzulqxtvcufr:Omharsh%402006@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true';
 
-const pool = new Pool({ connectionString: connectionString || 'postgresql://dummy:dummy@localhost:5432/dummy' });
+const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 export const prisma = new PrismaClient({ adapter });
 
 export const connectDB = async () => {
   try {
-    if (!connectionString) {
-      throw new Error('DATABASE_URL environment variable is missing!');
-    }
     await prisma.$connect();
     logger.info('PostgreSQL connected via Prisma');
   } catch (error) {
