@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { Card, CardContent } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import styles from './Settings.module.css';
 

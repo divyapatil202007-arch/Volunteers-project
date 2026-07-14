@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
 import { Medal, MapPin, CheckCircle, ExternalLink, Send, MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
 
 const volunteers = [
   {
@@ -106,9 +104,9 @@ export function VolunteerList() {
           <div className="mt-6 space-y-4">
             <div className="flex flex-wrap gap-2">
               {vol.skills.map(skill => (
-                <Badge key={skill} variant="secondary" className="bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border-blue-500/20">
+                <span key={skill} className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 border border-blue-500/20">
                   {skill}
-                </Badge>
+                </span>
               ))}
             </div>
             

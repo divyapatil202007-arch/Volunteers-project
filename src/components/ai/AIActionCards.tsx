@@ -1,6 +1,6 @@
 import { Calendar, MapPin, Users } from 'lucide-react';
 import styles from './AIChat.module.css';
-import { Button } from '../ui/Button';
+import { Button } from '@/components/ui/Button';
 
 export function AIEventCard({ data }: { data: any }) {
   return (

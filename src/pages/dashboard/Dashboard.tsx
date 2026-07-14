@@ -15,8 +15,8 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, MotionCard } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle, MotionCard } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import styles from './Dashboard.module.css';
 
 ChartJS.register(

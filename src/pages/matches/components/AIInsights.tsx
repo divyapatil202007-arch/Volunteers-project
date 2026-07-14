@@ -1,5 +1,5 @@
 import { Lightbulb, TrendingUp, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
 export function AIInsights() {
   return (

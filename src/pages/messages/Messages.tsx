@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Phone, Video, MoreVertical, MessageSquare, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 // --- MOCK DATA ---
 const MOCK_CONTACTS = [
@@ -137,14 +137,14 @@ export function Messages() {
               </div>
               
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-full">
-                  <Phone className="w-5 h-5" />
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                  <Phone size={20} />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-full">
-                  <Video className="w-5 h-5" />
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                  <Video size={20} />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-full">
-                  <MoreVertical className="w-5 h-5" />
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                  <MoreVertical size={20} />
                 </Button>
               </div>
             </div>

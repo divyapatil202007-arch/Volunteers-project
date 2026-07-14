@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import styles from './Layout.module.css';
-import { Button } from '../ui/Button';
+import { Button } from '@/components/ui/Button';
 import { Input } from '../ui/Input';
 import { AIChat } from '../ai/AIChat';
 

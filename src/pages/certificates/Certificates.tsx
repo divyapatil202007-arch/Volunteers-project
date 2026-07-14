@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Download, Share2, Award } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { Button } from '@/components/ui/Button';
 import styles from './Certificates.module.css';
 
 const CERTIFICATES = [
