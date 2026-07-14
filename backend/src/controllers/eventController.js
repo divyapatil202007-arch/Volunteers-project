@@ -1,22 +1,19 @@
-// In-memory data for hackathon
-export const events = [];
-export const ngos = [];
+import { prisma } from '../config/db.js';
 
 // @desc    Get all events
 // @route   GET /api/events
 // @access  Public
 export const getEvents = async (req, res, next) => {
   try {
-    // Populate ngo
-    const populatedEvents = events.map(e => ({
-      ...e,
-      ngo: ngos.find(n => n.id === e.ngoId) || null
-    }));
-    
+    const events = await prisma.event.findMany({
+      include: {
+        ngo: true
+      }
+    });
     res.status(200).json({
       success: true,
-      count: populatedEvents.length,
-      data: populatedEvents
+      count: events.length,
+      data: events
     });
   } catch (err) {
     next(err);
@@ -28,13 +25,15 @@ export const getEvents = async (req, res, next) => {
 // @access  Public
 export const getEvent = async (req, res, next) => {
   try {
-    const event = events.find(e => e.id === req.params.id);
+    const event = await prisma.event.findUnique({
+      where: { id: req.params.id },
+      include: {
+        ngo: true
+      }
+    });
     if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
-    
-    event.ngo = ngos.find(n => n.id === event.ngoId) || null;
-
     res.status(200).json({
       success: true,
       data: event
@@ -49,13 +48,11 @@ export const getEvent = async (req, res, next) => {
 // @access  Private/NGO
 export const createEvent = async (req, res, next) => {
   try {
-    let ngo = ngos.find(n => n.userId === req.user.id);
-
-    // Auto-create an NGO profile if one doesn't exist for the hackathon demo
-    if (!ngo && req.user.role === 'ngo') {
-      ngo = { id: Math.random().toString(36).substring(7), userId: req.user.id, name: req.user.name };
-      ngos.push(ngo);
-    }
+    // Add NGO id to req.body. In prisma, we must connect the NGO.
+    // First find the NGO associated with this user.
+    const ngo = await prisma.nGO.findUnique({
+      where: { userId: req.user.id }
+    });
 
     if (!ngo) {
       return res.status(403).json({ success: false, message: 'You must have an NGO profile to create an event' });
@@ -63,20 +60,19 @@ export const createEvent = async (req, res, next) => {
 
     const { title, description, category, requiredSkills, location, startDate, endDate, maxVolunteers } = req.body;
 
-    const event = {
-      id: Math.random().toString(36).substring(7),
-      ngoId: ngo.id,
-      title,
-      description,
-      category,
-      requiredSkills: requiredSkills || [],
-      location,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      maxVolunteers: Number(maxVolunteers)
-    };
-    
-    events.push(event);
+    const event = await prisma.event.create({
+      data: {
+        ngoId: ngo.id,
+        title,
+        description,
+        category,
+        requiredSkills: requiredSkills || [],
+        location,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        maxVolunteers: Number(maxVolunteers)
+      }
+    });
 
     res.status(201).json({
       success: true,
@@ -92,24 +88,28 @@ export const createEvent = async (req, res, next) => {
 // @access  Private/NGO
 export const updateEvent = async (req, res, next) => {
   try {
-    const index = events.findIndex(e => e.id === req.params.id);
+    let event = await prisma.event.findUnique({
+      where: { id: req.params.id },
+      include: { ngo: true }
+    });
 
-    if (index === -1) {
+    if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    let event = events[index];
-    const ngo = ngos.find(n => n.id === event.ngoId);
-
-    if (ngo?.userId !== req.user.id && req.user.role !== 'admin') {
+    // Make sure user is event owner
+    if (event.ngo.userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Not authorized to update this event' });
     }
 
-    events[index] = { ...event, ...req.body };
+    event = await prisma.event.update({
+      where: { id: req.params.id },
+      data: req.body
+    });
 
     res.status(200).json({
       success: true,
-      data: events[index]
+      data: event
     });
   } catch (err) {
     next(err);
@@ -121,20 +121,22 @@ export const updateEvent = async (req, res, next) => {
 // @access  Private/NGO
 export const deleteEvent = async (req, res, next) => {
   try {
-    const index = events.findIndex(e => e.id === req.params.id);
+    const event = await prisma.event.findUnique({
+      where: { id: req.params.id },
+      include: { ngo: true }
+    });
 
-    if (index === -1) {
+    if (!event) {
       return res.status(404).json({ success: false, message: 'Event not found' });
     }
 
-    const event = events[index];
-    const ngo = ngos.find(n => n.id === event.ngoId);
-
-    if (ngo?.userId !== req.user.id && req.user.role !== 'admin') {
+    if (event.ngo.userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this event' });
     }
 
-    events.splice(index, 1);
+    await prisma.event.delete({
+      where: { id: req.params.id }
+    });
 
     res.status(200).json({
       success: true,

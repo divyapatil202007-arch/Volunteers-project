@@ -1,14 +1,14 @@
 import { AuthService } from '../services/AuthService.js';
-// prisma import removed for hackathon mode
+import { prisma } from '../config/db.js';
 
 const sendTokenResponse = async (user, statusCode, res) => {
   const { token, refreshToken } = AuthService.generateTokens(user);
 
-  // Save refresh token in DB - mocked out
-  // await prisma.user.update({
-  //   where: { id: user.id },
-  //   data: { refreshToken }
-  // });
+  // Save refresh token in DB
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { refreshToken }
+  });
 
   const options = {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
@@ -62,13 +62,13 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    // Clear refresh token in DB - mocked out
-    // if (req.user) {
-    //   await prisma.user.update({
-    //     where: { id: req.user.id },
-    //     data: { refreshToken: null }
-    //   });
-    // }
+    // Clear refresh token in DB
+    if (req.user) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { refreshToken: null }
+      });
+    }
 
     res.cookie('token', 'none', {
       expires: new Date(Date.now() + 10 * 1000),
@@ -87,11 +87,9 @@ export const logout = async (req, res, next) => {
 
 export const getMe = async (req, res, next) => {
   try {
-    // Mock user lookup
-    // const user = await prisma.user.findUnique({
-    //   where: { id: req.user.id }
-    // });
-    const user = { ...req.user };
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id }
+    });
     
     // Remove password before sending
     if (user) {
