@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Award, Calendar, Zap, Sparkles } from 'lucide-react';
 import { 
@@ -68,15 +69,43 @@ const impactData = {
   ],
 };
 
-const STATS = [
-  { label: 'Total Hours', value: '124', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
-  { label: 'Certificates', value: '12', icon: Award, color: 'text-secondary', bg: 'bg-secondary/10' },
-  { label: 'Upcoming Events', value: '3', icon: Calendar, color: 'text-accent', bg: 'bg-accent/10' },
-  { label: 'AI Match Score', value: '98%', icon: Zap, color: 'text-warning', bg: 'bg-warning/10' },
-];
-
 export function Dashboard() {
   const navigate = useNavigate();
+  const [liveEvents, setLiveEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/events');
+        const data = await res.json();
+        if (data.success && data.data) {
+          setLiveEvents(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard stats', err);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const stats = [
+    { label: 'Total Hours', value: '124', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Certificates', value: '12', icon: Award, color: 'text-secondary', bg: 'bg-secondary/10' },
+    { label: 'Upcoming Events', value: liveEvents.length > 0 ? liveEvents.length.toString() : '3', icon: Calendar, color: 'text-accent', bg: 'bg-accent/10' },
+    { label: 'AI Match Score', value: '98%', icon: Zap, color: 'text-warning', bg: 'bg-warning/10' },
+  ];
+
+  const recentActivities = liveEvents.length > 0 
+    ? liveEvents.slice(0, 3).map(ev => ({
+        title: `Matched with "${ev.title}"`,
+        time: 'Recently',
+        icon: Calendar
+      }))
+    : [
+      { title: 'Completed "Tree Plantation Drive"', time: '2 hours ago', icon: Calendar },
+      { title: 'Earned "Green Guardian" Badge', time: '1 day ago', icon: Award },
+      { title: 'AI matched you with "Beach Cleanup"', time: '2 days ago', icon: Sparkles },
+    ];
 
   return (
     <div className={styles.dashboard}>
@@ -91,7 +120,7 @@ export function Dashboard() {
       </div>
 
       <div className={styles.statsGrid}>
-        {STATS.map((stat, i) => (
+        {stats.map((stat, i) => (
           <MotionCard 
             key={i}
             initial={{ opacity: 0, y: 20 }}
@@ -159,11 +188,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className={styles.activityList}>
-              {[
-                { title: 'Completed "Tree Plantation Drive"', time: '2 hours ago', icon: Calendar },
-                { title: 'Earned "Green Guardian" Badge', time: '1 day ago', icon: Award },
-                { title: 'AI matched you with "Beach Cleanup"', time: '2 days ago', icon: Sparkles },
-              ].map((activity, i) => (
+              {recentActivities.map((activity, i) => (
                 <div key={i} className={styles.activityItem}>
                   <div className={styles.activityIcon}>
                     <activity.icon size={16} />
