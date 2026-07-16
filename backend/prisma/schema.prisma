@@ -3,14 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id                  String            @id @default(uuid())
-  name                String            @db.VarChar(50)
+  name                String
   email               String            @unique
-  password            String
+  password            String?
   role                String            @default("volunteer")
   isEmailVerified     Boolean           @default(false)
   profilePicture      String            @default("default.jpg")
@@ -28,11 +29,11 @@ model User {
 model NGO {
   id                  String            @id @default(uuid())
   userId              String            @unique
-  organizationName    String            @db.VarChar(100)
+  organizationName    String
   registrationNumber  String            @unique
-  description         String            @db.VarChar(1000)
+  description         String
   website             String?
-  phone               String?           @db.VarChar(20)
+  phone               String?
   address             String
   isVerified          Boolean           @default(false)
   createdAt           DateTime          @default(now())
@@ -45,16 +46,16 @@ model NGO {
 model VolunteerProfile {
   id              String            @id @default(uuid())
   userId          String            @unique
-  bio             String?           @db.VarChar(500)
-  skills          String[]
-  interests       String[]
-  availability    String[]
-  languages       String[]
-  experience      String?           @db.VarChar(1000)
+  bio             String?
+  skills          String
+  interests       String
+  availability    String
+  languages       String
+  experience      String?
   location        String            @default("")
   volunteerHours  Int               @default(0)
-  achievements    String[]
-  badges          String[]
+  achievements    String
+  badges          String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -64,17 +65,17 @@ model VolunteerProfile {
 model Event {
   id                String            @id @default(uuid())
   ngoId             String
-  title             String            @db.VarChar(100)
-  description       String            @db.VarChar(1000)
+  title             String
+  description       String
   category          String
-  requiredSkills    String[]
+  requiredSkills    String
   location          String
   startDate         DateTime
   endDate           DateTime
   maxVolunteers     Int
   currentVolunteers Int               @default(0)
   status            String            @default("Draft")
-  images            String[]
+  images            String
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -87,7 +88,7 @@ model Application {
   eventId     String
   volunteerId String
   status      String            @default("Pending")
-  notes       String?           @db.VarChar(500)
+  notes       String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 

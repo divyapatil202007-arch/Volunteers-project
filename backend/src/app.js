@@ -52,10 +52,12 @@ app.get('/api/health', (req, res) => {
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import applicationRoutes from './routes/applicationRoutes.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/applications', applicationRoutes);
 
 // Error Handling Middleware
 app.use(notFoundHandler);

@@ -64,9 +64,13 @@ export function AIProvider({ children }: { children: ReactNode }) {
     setIsTyping(true);
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
         body: JSON.stringify({ message: content, history: messages })
       });
       

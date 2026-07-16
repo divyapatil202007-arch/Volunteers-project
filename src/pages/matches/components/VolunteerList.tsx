@@ -1,6 +1,9 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Medal, MapPin, CheckCircle, ExternalLink, Send, MessageCircle } from 'lucide-react';
+import { Medal, MapPin, CheckCircle, ExternalLink, Send, MessageCircle, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { CandidateProfileModal } from './CandidateProfileModal';
 
 const volunteers = [
   {
@@ -48,8 +51,47 @@ const volunteers = [
 ];
 
 export function VolunteerList() {
+  const navigate = useNavigate();
+  const [actionState, setActionState] = useState<Record<string, 'loading' | 'success' | null>>({});
+  const [selectedVolunteer, setSelectedVolunteer] = useState<any | null>(null);
+
+  const handleAction = (id: number, action: string, vol?: any) => {
+    const key = `${id}-${action}`;
+    setActionState(prev => ({ ...prev, [key]: 'loading' }));
+    
+    // For messaging, immediately redirect after a brief visual cue
+    if (action === 'message' && vol) {
+      setTimeout(() => {
+        navigate('/messages', { 
+          state: { 
+            contactId: vol.id.toString(), 
+            contactName: vol.name, 
+            avatar: vol.avatar 
+          } 
+        });
+      }, 500);
+      return;
+    }
+
+    setTimeout(() => {
+      setActionState(prev => ({ ...prev, [key]: 'success' }));
+      if (action === 'profile' && vol) {
+        setSelectedVolunteer(vol);
+      }
+      setTimeout(() => {
+        setActionState(prev => ({ ...prev, [key]: null }));
+      }, 3000);
+    }, 600);
+  };
+
   return (
     <div className="space-y-6">
+      {selectedVolunteer && (
+        <CandidateProfileModal 
+          volunteer={selectedVolunteer} 
+          onClose={() => setSelectedVolunteer(null)} 
+        />
+      )}
       {volunteers.map((vol, index) => (
         <motion.div
           key={vol.id}
@@ -118,14 +160,51 @@ export function VolunteerList() {
 
           {/* Footer Actions */}
           <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap gap-3">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Send className="w-4 h-4 mr-2" /> Invite to Event
+            <Button 
+              size="sm" 
+              onClick={() => handleAction(vol.id, 'invite')}
+              disabled={!!actionState[`${vol.id}-invite`]}
+              className={`transition-colors ${actionState[`${vol.id}-invite`] === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+            >
+              {actionState[`${vol.id}-invite`] === 'loading' ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Inviting...</>
+              ) : actionState[`${vol.id}-invite`] === 'success' ? (
+                <><Check className="w-4 h-4 mr-2" /> Invited!</>
+              ) : (
+                <><Send className="w-4 h-4 mr-2" /> Invite to Event</>
+              )}
             </Button>
-            <Button size="sm" variant="outline" className="bg-transparent border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-              <MessageCircle className="w-4 h-4 mr-2" /> Message
+            
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => handleAction(vol.id, 'message', vol)}
+              disabled={!!actionState[`${vol.id}-message`]}
+              className={`transition-colors bg-transparent ${actionState[`${vol.id}-message`] === 'success' ? 'border-emerald-600/50 text-emerald-400 bg-emerald-600/10 hover:bg-emerald-600/20' : 'border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+            >
+              {actionState[`${vol.id}-message`] === 'loading' ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Opening...</>
+              ) : actionState[`${vol.id}-message`] === 'success' ? (
+                <><Check className="w-4 h-4 mr-2" /> Sent!</>
+              ) : (
+                <><MessageCircle className="w-4 h-4 mr-2" /> Message</>
+              )}
             </Button>
-            <Button size="sm" variant="ghost" className="text-slate-400 hover:text-white ml-auto">
-              View Profile <ExternalLink className="w-4 h-4 ml-2" />
+            
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={() => handleAction(vol.id, 'profile', vol)}
+              disabled={!!actionState[`${vol.id}-profile`]}
+              className="text-slate-400 hover:text-white ml-auto"
+            >
+              {actionState[`${vol.id}-profile`] === 'loading' ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
+              ) : actionState[`${vol.id}-profile`] === 'success' ? (
+                <><Check className="w-4 h-4 mr-2" /> Opened</>
+              ) : (
+                <>View Profile <ExternalLink className="w-4 h-4 ml-2" /></>
+              )}
             </Button>
           </div>
 

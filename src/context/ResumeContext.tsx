@@ -1,4 +1,15 @@
 import { createContext, useState, useCallback, type ReactNode } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Define the events we can recommend (from Events.tsx)
+const MOCK_EVENTS = [
+  { id: '1', title: 'City Park Cleanup Drive', category: 'Environment', reqSkills: ['environment', 'nature', 'sustainability', 'clean', 'outdoors', 'biology', 'ecology'] },
+  { id: '2', title: 'Tech Skills Workshop for Youth', category: 'Education', reqSkills: ['education', 'teach', 'mentor', 'tutor', 'youth', 'students', 'learning', 'tech', 'software', 'code'] },
+  { id: '3', title: 'Senior Citizen Health Camp', category: 'Health', reqSkills: ['health', 'medical', 'nurse', 'care', 'doctor', 'first aid', 'clinical', 'hospital'] },
+  { id: '4', title: 'Neighborhood Food Drive', category: 'Community', reqSkills: ['community', 'organize', 'food', 'logistics', 'social', 'management', 'planning'] },
+  { id: '5', title: 'Stray Animal Rescue & Care', category: 'Animal Welfare', reqSkills: ['animal', 'pet', 'veterinary', 'dog', 'cat', 'wildlife', 'rescue'] },
+  { id: '6', title: 'Open Source Coding Bootcamp', category: 'Technology', reqSkills: ['react', 'python', 'javascript', 'java', 'c++', 'code', 'developer', 'software', 'tech', 'programming'] }
+];
 
 export interface ExtractedSkill {
   name: string;
@@ -33,6 +44,11 @@ interface ResumeContextType {
 
 export const ResumeContext = createContext<ResumeContextType | undefined>(undefined);
 
+// Set up PDF.js worker
+if (typeof window !== 'undefined' && 'Worker' in window) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+}
+
 export function ResumeProvider({ children }: { children: ReactNode }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -46,96 +62,123 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
     setIsUploading(false);
   }, []);
 
+  const extractTextFromPDF = async (file: File): Promise<string> => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) as any }).promise;
+      let fullText = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map((item: any) => item.str);
+        fullText += strings.join(' ') + ' ';
+      }
+      return fullText;
+    } catch (err) {
+      console.warn("PDF extraction failed, falling back to raw text", err);
+      // Fallback: raw text extraction (messy but catches keywords)
+      return await file.text();
+    }
+  };
+
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
     setUploadProgress(10);
-    setScanStatus('Uploading Document...');
+    setScanStatus('Reading Document Content...');
     
-    // Quick Hackathon OCR Simulation: Extract simple text or use fallback text
+    // 1. Actually Read the Resume!
     let resumeText = '';
-    try {
-      resumeText = await file.text(); // Works for txt, rudimentary for others
-    } catch {
-      resumeText = 'Experienced volunteer in event management and software engineering with Python and React.';
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      resumeText = await extractTextFromPDF(file);
+    } else {
+      resumeText = await file.text();
     }
-    // If it's a binary file and file.text() returns garbled data, we provide a fallback hackathon text
-    if (resumeText.length < 20 || resumeText.includes('')) {
-      resumeText = 'I am a passionate volunteer with 5 years of experience in organizing community events, teaching underprivileged children, and building websites using React and Node.js. I have strong communication skills and leadership abilities.';
+
+    // Fallback if empty
+    if (!resumeText || resumeText.length < 10) {
+      resumeText = 'General volunteer background with communication skills.';
     }
 
     setUploadProgress(40);
-    setScanStatus('Analyzing Document via Gemini AI...');
+    setScanStatus('Analyzing Specializations...');
 
-    try {
-      const response = await fetch('/api/ai/analyze-resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: resumeText })
+    // 2. Intelligent Keyword Matching
+    const textLower = resumeText.toLowerCase();
+    
+    // Calculate matches for each event
+    const matchedEvents = MOCK_EVENTS.map(event => {
+      let matches = 0;
+      let matchedKeywords: string[] = [];
+      
+      event.reqSkills.forEach(skill => {
+        if (textLower.includes(skill)) {
+          matches++;
+          matchedKeywords.push(skill);
+        }
       });
-      
-      const data = await response.json();
-      
-      setUploadProgress(80);
-      setScanStatus('Generating Volunteer Profile & Recommendations...');
 
-      if (data.success && data.data) {
-        // Map AI response to our required format
-        const aiSkills = data.data.skills.map((s: string) => ({
-          name: s,
-          confidence: Math.floor(Math.random() * 20) + 80, // Random 80-100
-          category: 'technical' as const
-        }));
+      return {
+        ...event,
+        matches,
+        matchedKeywords,
+        score: Math.min(100, (matches / 3) * 100) // Score based on keyword density
+      };
+    }).filter(e => e.matches > 0).sort((a, b) => b.matches - a.matches);
 
-        setResumeData({
-          volunteerScore: 92,
-          skills: aiSkills.length > 0 ? aiSkills : [
-            { name: 'Python', confidence: 98, category: 'technical' },
-            { name: 'React', confidence: 88, category: 'technical' }
-          ],
-          recommendations: [
-            {
-              id: 'evt-1',
-              title: 'Tech Education for Youth',
-              matchScore: 95,
-              reason: 'Matches your extracted tech skills perfectly.'
-            }
-          ],
-          strengths: data.data.interests || ['Strong Technical Foundations'],
-          weaknesses: ['Limited direct NGO experience'],
-          careerSuggestions: [
-            data.data.experienceSummary || 'Use your skills to help NGOs build digital infrastructure.'
-          ]
-        });
-      } else {
-        throw new Error(data.message || 'AI failed to process');
-      }
-    } catch (err: any) {
-      console.error(err);
-      setScanStatus('Fallback to mock data (API Key not set?)');
-      // Mock highly detailed returned data
-      setResumeData({
-        volunteerScore: 84,
-        skills: [
-          { name: 'Python', confidence: 98, category: 'technical' },
-          { name: 'JavaScript', confidence: 92, category: 'technical' },
-          { name: 'React', confidence: 88, category: 'technical' },
-          { name: 'Leadership', confidence: 90, category: 'soft' },
-        ],
-        recommendations: [
-          {
-            id: 'evt-1',
-            title: 'Teaching Program for Underprivileged Youth',
-            matchScore: 95,
-            reason: 'Matches your strong Communication and Leadership skills.'
-          }
-        ],
-        strengths: ['Strong Technical Foundations', 'Proven Leadership in teams'],
-        weaknesses: ['Limited direct NGO experience'],
-        careerSuggestions: [
-          'Consider taking a First-Aid certification to broaden your volunteering scope.',
-        ]
+    // Default event if no matches
+    if (matchedEvents.length === 0) {
+      matchedEvents.push({
+        ...MOCK_EVENTS[3], // Neighborhood Food Drive
+        matches: 1,
+        matchedKeywords: ['community'],
+        score: 75
       });
     }
+
+    const topMatch = matchedEvents[0];
+    
+    // Extract generic skills based on found keywords
+    const extractedSkills: ExtractedSkill[] = [];
+    const allFoundKeywords = new Set<string>();
+    matchedEvents.forEach(e => e.matchedKeywords.forEach(k => allFoundKeywords.add(k)));
+    
+    Array.from(allFoundKeywords).slice(0, 5).forEach((kw, index) => {
+      extractedSkills.push({
+        name: kw.charAt(0).toUpperCase() + kw.slice(1),
+        confidence: 90 - (index * 2),
+        category: index % 2 === 0 ? 'technical' : 'soft'
+      });
+    });
+
+    if (extractedSkills.length === 0) {
+      extractedSkills.push({ name: 'Communication', confidence: 85, category: 'soft' });
+      extractedSkills.push({ name: 'Organization', confidence: 80, category: 'soft' });
+    }
+
+    setUploadProgress(80);
+    setScanStatus('Generating Smart Recommendations...');
+
+    // Simulate slight API delay for UX
+    await new Promise(r => setTimeout(r, 1500));
+
+    // 3. Update the UI State dynamically based on the exact PDF uploaded!
+    setResumeData({
+      volunteerScore: Math.floor(topMatch.score),
+      skills: extractedSkills,
+      recommendations: [
+        {
+          id: topMatch.id,
+          title: topMatch.title,
+          matchScore: Math.floor(topMatch.score),
+          reason: `Based on your background in ${topMatch.matchedKeywords.slice(0, 2).join(' and ')}, this ${topMatch.category} event is a perfect fit.`
+        }
+      ],
+      strengths: [`Strong alignment with ${topMatch.category} initiatives`, `Demonstrated ${extractedSkills[0]?.name || 'dedication'}`],
+      weaknesses: ['Could benefit from cross-domain volunteering'],
+      careerSuggestions: [
+        `Consider taking leadership roles in ${topMatch.category} events to build upon your existing specialization.`
+      ]
+    });
 
     setUploadProgress(100);
     setScanStatus('Analysis Complete!');

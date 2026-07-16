@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import { supabase } from '../config/supabase.js';
 import { prisma } from '../config/db.js';
 
 // Protect routes
@@ -20,23 +20,38 @@ export const protect = async (req, res, next) => {
   }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token with Supabase
+    const { data, error } = await supabase.auth.getUser(token);
+    const supabaseUser = data?.user;
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id }
-    });
-    
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'User not found' });
+    if (error || !supabaseUser) {
+      return res.status(401).json({ success: false, message: 'Invalid token' });
     }
 
-    // Don't pass the password to req.user
-    delete user.password;
+    // Find the user in our Prisma DB
+    let user = await prisma.user.findUnique({
+      where: { email: supabaseUser.email }
+    });
+    
+    // Auto-sync: Create the user in Prisma if they don't exist yet
+    if (!user) {
+      const name = supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0];
+      const role = supabaseUser.user_metadata?.role || 'volunteer';
+      user = await prisma.user.create({
+        data: {
+          email: supabaseUser.email,
+          name: name,
+          role: role,
+        }
+      });
+    }
+
+    // Don't pass the password to req.user (even if it's optional now)
+    if (user.password) delete user.password;
     req.user = user;
 
     next();
-  } catch (_err) {
+  } catch (err) {
     return res.status(401).json({ success: false, message: 'Not authorized to access this route' });
   }
 };

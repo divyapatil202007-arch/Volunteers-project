@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export function Login() {
   const navigate = useNavigate();
@@ -16,32 +17,43 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        throw new Error('Server encountered an error. Please check your database connection.');
+      if (error) {
+        throw error;
       }
 
-      if (!response.ok) {
-        throw new Error(data?.message || 'Login failed');
+      if (data.session) {
+        let role = data.user.user_metadata?.role || 'volunteer';
+        let name = data.user.user_metadata?.full_name || '';
+        
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${data.session.access_token}`
+            }
+          });
+          const backendData = await res.json();
+          name = backendData.data?.name || name;
+          role = backendData.data?.role || role;
+        } catch (err) {
+          console.warn('Backend sync failed, using local metadata');
+        }
+        
+        localStorage.setItem('userEmail', data.user.email || '');
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('token', data.session.access_token);
+        
+        if (role === 'ngo') {
+          navigate('/ngo-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
-
-      if (data.data && data.data.user) {
-        localStorage.setItem('userEmail', data.data.user.email);
-        localStorage.setItem('userName', data.data.user.name);
-        localStorage.setItem('userRole', data.data.user.role);
-        localStorage.setItem('token', data.data.token);
-      }
-      
-      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message);
     } finally {

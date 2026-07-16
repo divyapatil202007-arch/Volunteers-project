@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Sparkles, ArrowRight, Building2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -14,44 +15,65 @@ export function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            role: formData.role
+          }
+        }
       });
 
-      let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
+      if (error) {
+        throw error;
+      }
+
+      if (data.session) {
+        let role = formData.role;
+        let name = formData.name;
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${data.session.access_token}`
+            }
+          });
+          const backendData = await res.json();
+          name = backendData.data?.name || name;
+          role = backendData.data?.role || role;
+        } catch (err) {
+          console.warn('Backend sync failed, using local form data');
+        }
+
+        localStorage.setItem('userEmail', data.user?.email || '');
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userRole', role);
+        localStorage.setItem('token', data.session.access_token);
+        
+        if (role === 'ngo') {
+          navigate('/ngo-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
-        throw new Error('Server encountered an error. Please check your database connection.');
+        setError('Signup failed. Please try again.');
       }
-
-      if (!response.ok) {
-        throw new Error(data?.message || 'Registration failed');
-      }
-
-      if (data.data && data.data.user) {
-        localStorage.setItem('userEmail', data.data.user.email);
-        localStorage.setItem('userName', data.data.user.name);
-        localStorage.setItem('userRole', data.data.user.role);
-        localStorage.setItem('token', data.data.token);
-      }
-      
-      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden py-12">
@@ -86,101 +108,101 @@ export function Signup() {
           </div>
 
           <form onSubmit={handleSignup} className="space-y-5 relative z-10">
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl flex items-center gap-2"
-              >
-                <div className="w-1 h-full bg-red-500 rounded-full" />
-                {error}
-              </motion.div>
-            )}
-
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <button
-                type="button"
-                onClick={() => setFormData({...formData, role: 'volunteer'})}
-                className={`py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all ${
-                  formData.role === 'volunteer' 
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' 
-                    : 'bg-slate-950/50 text-slate-400 border border-slate-700 hover:bg-slate-800'
-                }`}
-              >
-                <User className="w-4 h-4" /> Volunteer
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({...formData, role: 'ngo'})}
-                className={`py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all ${
-                  formData.role === 'ngo' 
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50' 
-                    : 'bg-slate-950/50 text-slate-400 border border-slate-700 hover:bg-slate-800'
-                }`}
-              >
-                <Building2 className="w-4 h-4" /> NGO
-              </button>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-300 ml-1">Full Name</label>
-              <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
-                <input 
-                  type="text" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
-                  placeholder="John Doe"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
-                <input 
-                  type="email" 
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
-                  placeholder="name@company.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
-                <input 
-                  type="password" 
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none mt-4"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  Create Account <ArrowRight className="w-4 h-4" />
-                </>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl flex items-center gap-2"
+                >
+                  <div className="w-1 h-full bg-red-500 rounded-full" />
+                  {error}
+                </motion.div>
               )}
-            </button>
-          </form>
+
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, role: 'volunteer'})}
+                  className={`py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all ${
+                    formData.role === 'volunteer' 
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' 
+                      : 'bg-slate-950/50 text-slate-400 border border-slate-700 hover:bg-slate-800'
+                  }`}
+                >
+                  <User className="w-4 h-4" /> Volunteer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, role: 'ngo'})}
+                  className={`py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all ${
+                    formData.role === 'ngo' 
+                      ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50' 
+                      : 'bg-slate-950/50 text-slate-400 border border-slate-700 hover:bg-slate-800'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4" /> NGO
+                </button>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-300 ml-1">Full Name</label>
+                <div className="relative group">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                  <input 
+                    type="text" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-300 ml-1">Email Address</label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                  <input 
+                    type="email" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                    placeholder="name@company.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                  <input 
+                    type="password" 
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none mt-4"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Create Account <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
 
           <div className="mt-8 text-center text-sm text-slate-400 relative z-10">
             Already have an account?{' '}

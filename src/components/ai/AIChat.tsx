@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, X, Maximize2, Trash2 } from 'lucide-react';
+import { Bot, X, Maximize2, Trash2, Sparkles } from 'lucide-react';
 import styles from './AIChat.module.css';
 import { useAI } from '../../hooks/useAI';
 import { AIMessage } from './AIMessage';
@@ -21,19 +21,32 @@ export function AIChat() {
 
   return (
     <>
-      <div className={styles.fabContainer}>
+      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-4">
         <AnimatePresence>
           {!isOpen && (
             <motion.button
-              className={styles.fabButton}
+              className="relative w-16 h-16 rounded-full flex items-center justify-center outline-none cursor-pointer group shadow-[0_10px_40px_-10px_rgba(99,102,241,0.8)]"
               onClick={toggleChat}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Bot size={24} />
+              {/* Pulsing glow behind */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-ping opacity-25" style={{ animationDuration: '3s' }} />
+              
+              {/* Main vibrant gradient background */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 border border-white/20 shadow-inner overflow-hidden">
+                {/* Shine reflection effect */}
+                <div className="absolute -inset-1/2 bg-gradient-to-tr from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-full transition-all duration-700 transform -skew-x-12" />
+              </div>
+              
+              {/* Icons */}
+              <div className="relative z-10 flex items-center justify-center">
+                <Bot size={28} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover:scale-110" />
+                <Sparkles size={14} className="text-yellow-300 absolute -top-1 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
+              </div>
             </motion.button>
           )}
         </AnimatePresence>
