@@ -14,7 +14,7 @@ export const prisma = new PrismaClient({ errorFormat: 'minimal' });
 export const connectDB = async () => {
   try {
     await prisma.$connect();
-    logger.info('SQLite Database connected via Prisma');
+    logger.info('Database connected via Prisma');
   } catch (error) {
     logger.error('Prisma connection error:', error.message);
     throw error;
