@@ -5,130 +5,7 @@ import { Calendar, MapPin, Users, ArrowLeft, Info, CheckCircle2, Share2, Heart, 
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-const MOCK_EVENTS = [
-  {
-    id: '1',
-    title: 'City Park Cleanup Drive',
-    category: 'Environment',
-    startDate: new Date(Date.now() + 86400000 * 2).toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 2 + 14400000).toISOString(),
-    location: 'Central City Park, NY',
-    currentVolunteers: 24,
-    maxVolunteers: 50,
-    images: ['/city_park_cleanup.png'],
-    relatedImages: ['/cleanup_related_1.png', '/cleanup_related_2.png', '/cleanup_related_3.png'],
-    description: 'Join us for our monthly City Park Cleanup Drive! We will be focusing on the main trails and the lake area. All supplies including gloves, bags, and grabbers will be provided. This is a great opportunity to get some fresh air and keep our community beautiful.',
-    requirements: ['Must be 16 or older', 'Comfortable walking for 2 hours', 'Wear closed-toe shoes'],
-    organizer: 'Green Earth NGO',
-    organizerAvatar: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150&h=150',
-    skills: ['Teamwork', 'Physical Stamina']
-  },
-  {
-    id: '2',
-    title: 'Tech Skills Workshop for Youth',
-    category: 'Education',
-    startDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 5 + 10800000).toISOString(),
-    location: 'Community Center Library',
-    currentVolunteers: 12,
-    maxVolunteers: 20,
-    images: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1200&h=600'],
-    relatedImages: [
-      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=600&h=400'
-    ],
-    description: 'Help teach basic coding and computer skills to underprivileged youth. We are looking for volunteers with knowledge of HTML, CSS, and basic JavaScript. We will provide the curriculum and laptops.',
-    requirements: ['Basic programming knowledge', 'Patience and good communication', 'Prior tutoring experience is a plus'],
-    organizer: 'Code for Good',
-    organizerAvatar: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=150&h=150',
-    skills: ['Teaching', 'JavaScript', 'HTML/CSS']
-  },
-  {
-    id: '3',
-    title: 'Senior Citizen Health Camp',
-    category: 'Health',
-    startDate: new Date(Date.now() + 86400000 * 7).toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 7 + 14400000).toISOString(),
-    location: 'Mercy General Hospital',
-    currentVolunteers: 45,
-    maxVolunteers: 100,
-    images: ['https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=1200&h=600'],
-    relatedImages: [
-      'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1581056771107-24ca5f033842?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1551076805-e1869043e560?auto=format&fit=crop&q=80&w=600&h=400'
-    ],
-    description: 'Assist doctors and nurses at our free health camp for senior citizens. Volunteers will help with registration, guiding patients, and distributing prescribed medications and nutrition kits.',
-    requirements: ['Compassionate and patient', 'Good communication skills', 'Medical background is a plus but not required'],
-    organizer: 'HealthFirst Foundation',
-    organizerAvatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=150&h=150',
-    skills: ['Communication', 'Empathy']
-  },
-  {
-    id: '4',
-    title: 'Neighborhood Food Drive',
-    category: 'Community',
-    startDate: new Date(Date.now() + 86400000 * 3).toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 3 + 18000000).toISOString(),
-    location: 'Downtown Square',
-    currentVolunteers: 8,
-    maxVolunteers: 30,
-    images: ['https://images.unsplash.com/photo-1594708767771-a7502209ff51?auto=format&fit=crop&q=80&w=1200&h=600'],
-    relatedImages: [
-      'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1618477461853-cf6ed80fbea5?auto=format&fit=crop&q=80&w=600&h=400'
-    ],
-    description: 'Help us sort, pack, and distribute food packages to families in need. Your efforts will directly help combat food insecurity in our local neighborhood.',
-    requirements: ['Ability to lift up to 20 lbs', 'Friendly attitude'],
-    organizer: 'Community Cares',
-    organizerAvatar: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=150&h=150',
-    skills: ['Organization', 'Physical Stamina']
-  },
-  {
-    id: '5',
-    title: 'Stray Animal Rescue & Care',
-    category: 'Animal Welfare',
-    startDate: new Date(Date.now() + 86400000 * 10).toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 10 + 14400000).toISOString(),
-    location: 'Safe Paws Shelter',
-    currentVolunteers: 15,
-    maxVolunteers: 25,
-    images: ['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=1200&h=600'],
-    relatedImages: [
-      'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=600&h=400'
-    ],
-    description: 'Spend your day helping out at the Safe Paws Shelter! Volunteers will assist with feeding, walking dogs, cleaning enclosures, and socializing with rescued cats and dogs.',
-    requirements: ['Comfortable around animals', 'Not allergic to cats/dogs'],
-    organizer: 'Safe Paws Animal Rescue',
-    organizerAvatar: 'https://images.unsplash.com/photo-1581888227599-779811939961?auto=format&fit=crop&q=80&w=150&h=150',
-    skills: ['Animal Care', 'Compassion']
-  },
-  {
-    id: '6',
-    title: 'Open Source Coding Bootcamp',
-    category: 'Technology',
-    startDate: new Date(Date.now() + 86400000 * 14).toISOString(),
-    endDate: new Date(Date.now() + 86400000 * 14 + 28800000).toISOString(),
-    location: 'Virtual / Online',
-    currentVolunteers: 120,
-    maxVolunteers: 500,
-    images: ['https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=1200&h=600'],
-    relatedImages: [
-      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=600&h=400',
-      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=600&h=400'
-    ],
-    description: 'Join our massive online coding bootcamp! We need volunteer mentors to help guide participants through open-source contributions, review pull requests, and answer questions on Discord.',
-    requirements: ['Experience with Git and GitHub', 'Proficiency in at least one programming language'],
-    organizer: 'Global Tech Initiative',
-    organizerAvatar: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=150&h=150',
-    skills: ['Programming', 'Mentoring']
-  }
-];
+import { MOCK_EVENTS } from '@/data/mockEvents';
 
 export function EventDetails() {
   const { id } = useParams();
@@ -141,6 +18,7 @@ export function EventDetails() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [eventStatus, setEventStatus] = useState('Active');
+  const [showNgoProfileModal, setShowNgoProfileModal] = useState(false);
 
   const handleExportRoster = () => {
     setIsExporting(true);
@@ -332,11 +210,11 @@ export function EventDetails() {
 
           {/* Sidebar Area */}
           <div className="space-y-6">
-            <Card className="border-0 shadow-lg bg-slate-50 dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+            <Card className="border-0 shadow-lg bg-slate-50 ring-1 ring-slate-200">
               <CardContent className="p-6">
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 text-slate-700 dark:text-slate-200">
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-4 text-slate-700">
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                       <Calendar size={24} />
                     </div>
                     <div>
@@ -348,8 +226,8 @@ export function EventDetails() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-slate-700 dark:text-slate-200">
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-4 text-slate-700">
+                    <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
                       <MapPin size={24} />
                     </div>
                     <div>
@@ -358,14 +236,14 @@ export function EventDetails() {
                     </div>
                   </div>
                   
-                  <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                  <div className="pt-4 border-t border-slate-200">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                      <span className="font-bold text-slate-800 flex items-center gap-2">
                         <Users size={18} /> Volunteers
                       </span>
                       <span className="text-sm font-semibold text-primary">{progress}% Filled</span>
                     </div>
-                    <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+                    <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden mb-2">
                       <div 
                         className="h-full bg-primary rounded-full transition-all duration-1000" 
                         style={{ width: `${progress}%` }}
@@ -413,26 +291,26 @@ export function EventDetails() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
+            <Card className="border-0 shadow-lg bg-white ring-1 ring-slate-200">
               <CardContent className="p-6">
                 {userRole === 'ngo' ? (
                   <>
-                    <h3 className="font-bold text-slate-800 dark:text-white mb-4 uppercase text-xs tracking-wider flex items-center gap-2">
+                    <h3 className="font-bold text-slate-800 mb-4 uppercase text-xs tracking-wider flex items-center gap-2">
                       <Settings size={14} /> Management Tools
                     </h3>
                     <div className="space-y-3">
-                      <Button onClick={handleExportRoster} disabled={isExporting} variant="outline" className="w-full justify-start text-slate-600 dark:text-slate-300">
+                      <Button onClick={handleExportRoster} disabled={isExporting} variant="outline" className="w-full justify-start text-slate-600">
                         {isExporting ? <div className="w-4 h-4 mr-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" /> : <Download size={16} className="mr-3 text-slate-400" />} 
                         {isExporting ? 'Exporting...' : 'Export CSV Roster'}
                       </Button>
-                      <Button onClick={() => navigate('/messages')} variant="outline" className="w-full justify-start text-slate-600 dark:text-slate-300">
+                      <Button onClick={() => navigate('/messages')} variant="outline" className="w-full justify-start text-slate-600">
                         <MessageSquare size={16} className="mr-3 text-slate-400" /> Message Volunteers
                       </Button>
                       <Button 
                         disabled={eventStatus === 'Cancelled'}
                         onClick={() => setShowCancelModal(true)} 
                         variant="outline" 
-                        className="w-full justify-start text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 border-rose-200 dark:border-rose-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full justify-start text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {eventStatus === 'Cancelled' ? 'Event Cancelled' : 'Cancel Event'}
                       </Button>
@@ -440,16 +318,16 @@ export function EventDetails() {
                   </>
                 ) : (
                   <>
-                    <h3 className="font-bold text-slate-800 dark:text-white mb-4 uppercase text-xs tracking-wider">Organized By</h3>
+                    <h3 className="font-bold text-slate-800 mb-4 uppercase text-xs tracking-wider">Organized By</h3>
                     <div className="flex items-center gap-4">
                       <img 
                         src={event.organizerAvatar || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150&h=150'} 
                         alt={event.organizer}
-                        className="w-14 h-14 rounded-full border-2 border-slate-100 dark:border-slate-800"
+                        className="w-14 h-14 rounded-full border-2 border-slate-100"
                       />
                       <div>
-                        <p className="font-bold text-slate-800 dark:text-white">{event.organizer || 'Local Community NGO'}</p>
-                        <p className="text-sm text-primary hover:underline cursor-pointer">View Profile</p>
+                        <p className="font-bold text-slate-800">{event.organizer || 'Local Community NGO'}</p>
+                        <p className="text-sm text-primary hover:underline cursor-pointer" onClick={() => setShowNgoProfileModal(true)}>View Profile</p>
                       </div>
                     </div>
                   </>
@@ -500,8 +378,79 @@ export function EventDetails() {
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Cancel Event?</h2>
             <p className="text-slate-500 mb-6">Are you sure you want to cancel this event? All registered volunteers will be notified immediately.</p>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={() => setShowCancelModal(false)}>Keep Event</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700 text-white" onClick={() => { setEventStatus('Cancelled'); setShowCancelModal(false); }}>Yes, Cancel It</Button>
+               <Button variant="outline" onClick={() => setShowCancelModal(false)}>Keep Event</Button>
+               <Button className="bg-rose-600 hover:bg-rose-700 text-white" onClick={() => { setEventStatus('Cancelled'); setShowCancelModal(false); }}>Yes, Cancel It</Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* NGO Profile Modal */}
+      {showNgoProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowNgoProfileModal(false)} />
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">NGO Profile</h2>
+              <button onClick={() => setShowNgoProfileModal(false)} className="text-slate-400 hover:text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="p-6 max-h-[80vh] overflow-y-auto space-y-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <img 
+                  src={event.organizerAvatar || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=150&h=150'} 
+                  alt={event.organizer}
+                  className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 object-cover"
+                />
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{event.organizer || 'Local Community NGO'}</h3>
+                  <p className="text-primary font-medium mt-1">Established 2010 • {event.category}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-bold text-slate-800 dark:text-white mb-2">About Us</h4>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {event.organizer} is dedicated to creating a positive impact in our community. We work tirelessly to support {event.category.toLowerCase()} initiatives, empower local residents, and build a stronger, more resilient society. Over the past decade, we have successfully mobilized thousands of volunteers for meaningful change.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-center border border-slate-100 dark:border-slate-700">
+                  <p className="text-2xl font-bold text-primary">150+</p>
+                  <p className="text-xs text-slate-500 font-medium mt-1">Projects</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-center border border-slate-100 dark:border-slate-700">
+                  <p className="text-2xl font-bold text-primary">12k</p>
+                  <p className="text-xs text-slate-500 font-medium mt-1">Volunteers</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-center border border-slate-100 dark:border-slate-700">
+                  <p className="text-2xl font-bold text-primary">50</p>
+                  <p className="text-xs text-slate-500 font-medium mt-1">Cities</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl text-center border border-slate-100 dark:border-slate-700">
+                  <p className="text-2xl font-bold text-primary">4.9</p>
+                  <p className="text-xs text-slate-500 font-medium mt-1">Rating</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-800 dark:text-white mb-3">Contact Information</h4>
+                <ul className="space-y-3 text-slate-600 dark:text-slate-300">
+                  <li className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                    <MapPin size={18} className="text-primary shrink-0" /> 
+                    <span>123 Community Hub, Main Street</span>
+                  </li>
+                  <li className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                    <Info size={18} className="text-primary shrink-0" /> 
+                    <span>contact@{event.organizer?.toLowerCase().replace(/\s/g, '') || 'ngo'}.org</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <Button onClick={() => setShowNgoProfileModal(false)}>Close</Button>
             </div>
           </motion.div>
         </div>

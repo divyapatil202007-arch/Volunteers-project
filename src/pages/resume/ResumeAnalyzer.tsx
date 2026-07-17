@@ -1,10 +1,12 @@
 import { FileText, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { UploadArea } from '../../components/resume/UploadArea';
 import { SkillRadarChart } from '../../components/resume/SkillRadarChart';
 import { useResume } from '../../hooks/useResume';
 import { Button } from '@/components/ui/Button';
 
 export function ResumeAnalyzer() {
+  const navigate = useNavigate();
   const { isUploading, resumeData, resetAnalyzer } = useResume();
 
   return (
@@ -32,7 +34,7 @@ export function ResumeAnalyzer() {
         <div className="flex flex-col items-center justify-center py-12">
           {isUploading ? (
             <div className="flex flex-col items-center gap-6 animate-pulse">
-              <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_20px_rgba(99,102,241,0.2)]" />
+              <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-[0_0_20px_rgba(59,130,246,0.2)]" />
               <p className="text-slate-400 font-medium tracking-wide">Processing Document with AI...</p>
             </div>
           ) : (
@@ -70,7 +72,7 @@ export function ResumeAnalyzer() {
                   <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Suggested Roles</h3>
                   <div className="flex flex-wrap gap-2">
                     {resumeData.recommendations.map((role: any) => (
-                      <span key={role.id} className="px-2.5 py-1 bg-indigo-950/30 border border-indigo-900/50 text-indigo-300 rounded-md text-xs font-semibold shadow-sm">
+                      <span key={role.id} className="px-2.5 py-1 bg-blue-950/30 border border-blue-900/50 text-blue-300 rounded-md text-xs font-semibold shadow-sm">
                         {role.title}
                       </span>
                     ))}
@@ -96,8 +98,8 @@ export function ResumeAnalyzer() {
             </div>
 
             <Button 
-              className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all flex items-center justify-center gap-2"
-              onClick={() => {}}
+              className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white text-lg font-bold rounded-xl shadow-[0_0_25px_rgba(59,130,246,0.4)] transition-all flex items-center justify-center gap-2 mt-4"
+              onClick={() => navigate('/recommendations')}
             >
               View Recommended Matches <ArrowRight size={18} />
             </Button>

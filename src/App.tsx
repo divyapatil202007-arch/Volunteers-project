@@ -19,6 +19,7 @@ import { ResumeAnalyzer } from './pages/resume/ResumeAnalyzer';
 import { Messages } from './pages/messages/Messages';
 import { MatchFlow } from './pages/matches/MatchFlow';
 import { VolunteerHours } from './pages/hours/VolunteerHours';
+import { AIRecommendations } from './pages/dashboard/AIRecommendations';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           {/* Protected Routes inside Layout */}
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/recommendations" element={<AIRecommendations />} />
             <Route path="/ngo-dashboard" element={<NGODashboard />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/live-activity" element={<LiveActivityPage />} />

@@ -125,12 +125,12 @@ export function Settings() {
                   className={cn(
                     "flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 whitespace-nowrap text-left border relative overflow-hidden group",
                     isActive 
-                      ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-500/30 text-white shadow-[0_0_15px_rgba(59,130,246,0.15)]" 
+                      ? "bg-primary/10 border-primary/30 text-primary shadow-sm" 
                       : "border-transparent text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
                   )}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
                   )}
                   <Icon size={18} className={cn(isActive ? "text-white" : "text-slate-400")} />
                   <span className="font-medium text-sm">{tab.label}</span>
@@ -164,7 +164,7 @@ export function Settings() {
                           onMouseLeave={() => setIsHoveringAvatar(false)}
                           onClick={() => fileInputRef.current?.click()}
                         >
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 blur-md opacity-40 group-hover:opacity-70 transition-opacity duration-300 -z-10" />
+                          <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-40 group-hover:opacity-70 transition-opacity duration-300 -z-10" />
                           <img 
                             src={avatar} 
                             alt="Profile" 
@@ -188,7 +188,7 @@ export function Settings() {
                               accept="image/*" 
                               className="hidden" 
                             />
-                            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:scale-105 transition-all duration-300 rounded-xl px-6 font-bold" onClick={() => fileInputRef.current?.click()}>Upload New</Button>
+                            <Button className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-300 rounded-xl px-6 font-bold" onClick={() => fileInputRef.current?.click()}>Upload New</Button>
                             <Button variant="outline" className="rounded-xl border-slate-600 hover:bg-slate-800 hover:text-white text-slate-300 transition-colors" onClick={handleRemoveImage}>Remove</Button>
                           </div>
                         </div>
@@ -208,12 +208,12 @@ export function Settings() {
                           </>
                         ) : (
                           <>
-                            <Input label="First Name" defaultValue="Divya" />
-                            <Input label="Last Name" defaultValue="Patil" />
+                            <Input label="First Name" defaultValue="Alex" />
+                            <Input label="Last Name" defaultValue="Volunteer" />
                           </>
                         )}
                         <div className="md:col-span-2">
-                          <Input label="Email Address" type="email" defaultValue={userRole === 'ngo' ? 'contact@greenearth.org' : 'divya@example.com'} />
+                          <Input label="Email Address" type="email" defaultValue={userRole === 'ngo' ? 'contact@greenearth.org' : 'alex@example.com'} />
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-sm font-bold mb-3 text-slate-300">{userRole === 'ngo' ? 'Mission Statement' : 'Bio'}</label>
@@ -231,7 +231,7 @@ export function Settings() {
                             "px-10 h-14 rounded-2xl shadow-xl transition-all duration-300 font-bold text-lg hover:-translate-y-1", 
                             isSaved 
                               ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                              : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-[0_0_25px_rgba(59,130,246,0.4)]"
+                              : "bg-primary hover:bg-primary/90 text-white shadow-md"
                           )}
                           onClick={handleSave}
                           disabled={isSaving}

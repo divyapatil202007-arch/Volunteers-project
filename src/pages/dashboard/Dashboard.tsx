@@ -1,6 +1,6 @@
-
-import { motion } from 'framer-motion';
-import { Clock, Calendar, Zap, Sparkles, CheckSquare, Wallet, Star, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, Calendar, Zap, Sparkles, CheckSquare, Star, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -15,6 +15,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
+import { MOCK_EVENTS } from '@/data/mockEvents';
 
 ChartJS.register(
   CategoryScale,
@@ -91,25 +92,29 @@ const impactData = {
   ],
 };
 
-const MY_AGENDA = [
+const INITIAL_AGENDA = [
   { id: 1, title: 'Check-in Desk Setup', event: 'City Park Cleanup', deadline: 'Today, 08:30 AM', status: 'Pending' },
   { id: 2, title: 'Sort Donations', event: 'Neighborhood Food Drive', deadline: 'Tomorrow, 10:00 AM', status: 'Pending' },
 ];
 
-const IMPACT_WALLET = {
+const IMPACT_METRICS = {
   reliabilityScore: 98,
-  qualityRating: 4.8,
-  approvedReimbursements: 120.50,
-  pendingReimbursements: 45.00
+  qualityRating: 4.8
 };
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const userName = localStorage.getItem('userName') || 'Divya';
+  const userName = localStorage.getItem('userName') || 'Volunteer';
+  
+  const [agenda, setAgenda] = useState(INITIAL_AGENDA);
+
+  const toggleTask = (id: number) => {
+    setAgenda(prev => prev.filter(task => task.id !== id));
+  };
 
   const stats = [
-    { label: 'Reliability Score', value: `${IMPACT_WALLET.reliabilityScore}%`, icon: ShieldCheck, accent: 'text-emerald-400 bg-emerald-950/30 border-emerald-900/50' },
-    { label: 'Quality Rating', value: `${IMPACT_WALLET.qualityRating}/5`, icon: Star, accent: 'text-amber-400 bg-amber-950/30 border-amber-900/50' },
+    { label: 'Reliability Score', value: `${IMPACT_METRICS.reliabilityScore}%`, icon: ShieldCheck, accent: 'text-emerald-400 bg-emerald-950/30 border-emerald-900/50' },
+    { label: 'Quality Rating', value: `${IMPACT_METRICS.qualityRating}/5`, icon: Star, accent: 'text-amber-400 bg-amber-950/30 border-amber-900/50' },
     { label: 'Verified Hours', value: '124', icon: Clock, accent: 'text-blue-400 bg-blue-950/30 border-blue-900/50' },
     { label: 'AI Match Score', value: '98%', icon: Zap, accent: 'text-purple-400 bg-purple-950/30 border-purple-900/50' },
   ];
@@ -130,10 +135,10 @@ export function Dashboard() {
         
         <button 
           className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-indigo-500 transition-colors active:scale-95 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-          onClick={() => navigate('/matches')}
+          onClick={() => navigate('/recommendations')}
         >
-          <Sparkles size={16} /> 
-          Find Matches
+          <Zap size={16} className="text-amber-400" /> 
+          AI Recommended Opportunities
         </button>
       </div>
 
@@ -203,57 +208,72 @@ export function Dashboard() {
             </h3>
           </div>
           <div className="divide-y divide-slate-800/50">
-            {MY_AGENDA.map((task) => (
-              <div key={task.id} className="p-5 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <h4 className="font-medium text-slate-200 text-sm mb-1">{task.title}</h4>
-                  <p className="text-xs text-slate-500 mb-3">{task.event}</p>
-                  <kbd className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-950 text-[10px] font-mono text-slate-400 border border-slate-800">
-                    <Calendar size={12} />
-                    {task.deadline}
-                  </kbd>
-                </div>
-                <button className="shrink-0 flex items-center gap-2 h-8 px-3 text-xs font-medium text-emerald-400 bg-emerald-950/20 hover:bg-emerald-950/40 border border-emerald-900/30 rounded-md transition-colors">
-                  <CheckCircle2 size={14} /> Mark Done
-                </button>
-              </div>
-            ))}
+            {agenda.length === 0 ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-8 text-center text-slate-500 text-sm">
+                You're all caught up! No pending agenda items.
+              </motion.div>
+            ) : (
+              <AnimatePresence>
+                {agenda.map((task) => (
+                  <motion.div 
+                    key={task.id} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, textDecoration: 'line-through' }}
+                    transition={{ duration: 0.3 }}
+                    className="p-5 hover:bg-slate-800/40 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  >
+                    <div>
+                      <h4 className="font-medium text-slate-200 text-sm mb-1">{task.title}</h4>
+                      <p className="text-xs text-slate-500 mb-3">{task.event}</p>
+                      <kbd className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-950 text-[10px] font-mono text-slate-400 border border-slate-800">
+                        <Calendar size={12} />
+                        {task.deadline}
+                      </kbd>
+                    </div>
+                    <button 
+                      onClick={() => toggleTask(task.id)}
+                      className="shrink-0 flex items-center gap-2 h-8 px-3 text-xs font-medium text-emerald-400 bg-emerald-950/20 hover:bg-emerald-950/40 border border-emerald-900/30 rounded-md transition-colors"
+                    >
+                      <CheckCircle2 size={14} /> Mark Done
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
           </div>
         </motion.div>
 
-        {/* Impact Wallet Section (Deep Indigo Accent) */}
+        {/* Top AI Matches Widget */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="col-span-1 md:col-span-2 p-6 bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/40 rounded-xl flex flex-col shadow-sm"
+          className="col-span-1 md:col-span-2 p-6 bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/40 rounded-xl flex flex-col shadow-sm cursor-pointer hover:border-indigo-500/30 transition-all group"
+          onClick={() => navigate('/recommendations')}
         >
-          <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2 mb-6">
-            <Wallet size={16} className="text-indigo-400" />
-            Impact Wallet
-          </h3>
-          
-          <div className="flex-1 flex flex-col justify-center mb-6">
-            <p className="text-[10px] font-medium text-indigo-300/70 mb-2 uppercase tracking-wider">Approved Reimbursements</p>
-            <div className="flex items-end gap-3 mb-2">
-              <h3 className="text-4xl font-semibold text-white tracking-tight">
-                ₹{IMPACT_WALLET.approvedReimbursements.toFixed(2)}
-              </h3>
-            </div>
-            <div className="inline-flex items-center gap-1.5 w-max px-2 py-1 rounded-md bg-amber-950/30 text-amber-400 text-[10px] font-mono border border-amber-900/50">
-              + ₹{IMPACT_WALLET.pendingReimbursements.toFixed(2)} Pending
-            </div>
+          <div className="flex justify-between items-start mb-6">
+            <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+              <Zap size={16} className="text-amber-400" />
+              Top AI Matches For You
+            </h3>
+            <span className="text-indigo-400 group-hover:translate-x-1 transition-transform">
+              <ArrowRight size={16} />
+            </span>
           </div>
-
-          <div className="grid grid-cols-2 gap-4 border-t border-indigo-900/30 pt-6">
-            <div>
-              <div className="text-2xl font-medium text-slate-100 mb-1">{IMPACT_WALLET.reliabilityScore}%</div>
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider">Reliability Score</p>
-            </div>
-            <div>
-              <div className="text-2xl font-medium text-slate-100 mb-1">{IMPACT_WALLET.qualityRating} <span className="text-slate-500 text-sm">/ 5</span></div>
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider">Quality Rating</p>
-            </div>
+          
+          <div className="flex-1 flex flex-col justify-center gap-4">
+            {MOCK_EVENTS.slice(0, 2).map((event, idx) => (
+              <div key={event.id} className="flex items-center gap-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800/50">
+                <div className="w-12 h-12 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/20 font-bold">
+                  {98 - (idx * 5)}%
+                </div>
+                <div>
+                  <h4 className="text-slate-200 font-medium text-sm line-clamp-1">{event.title}</h4>
+                  <p className="text-slate-500 text-xs">{event.organizer}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>

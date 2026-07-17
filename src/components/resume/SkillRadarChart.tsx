@@ -37,10 +37,10 @@ export function SkillRadarChart() {
             <Radar
               name="Skills"
               dataKey="A"
-              stroke="#6366F1"
-              strokeWidth={1.5}
-              fill="#4F46E5"
-              fillOpacity={0.2}
+              stroke="#2563EB"
+              strokeWidth={3}
+              fill="#3B82F6"
+              fillOpacity={0.4}
             />
           </RadarChart>
         </ResponsiveContainer>
