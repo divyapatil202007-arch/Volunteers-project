@@ -1,5 +1,5 @@
 export const getDemoEvents = () => {
-  const stored = localStorage.getItem('demo_events');
+  const stored = localStorage.getItem('demo_events_v2');
   if (stored) {
     return JSON.parse(stored);
   }
@@ -15,7 +15,7 @@ export const getDemoEvents = () => {
       startDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
       maxVolunteers: 40,
       currentVolunteers: 12,
-      images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800'],
+      images: ['/hackathon.png'],
       ngo: { organizationName: 'Tech for Good Foundation' },
       status: 'Published'
     },
@@ -29,7 +29,7 @@ export const getDemoEvents = () => {
       startDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
       maxVolunteers: 25,
       currentVolunteers: 20,
-      images: ['https://images.unsplash.com/photo-1416879598553-568393e1a067?auto=format&fit=crop&q=80&w=800'],
+      images: ['/garden.png'],
       ngo: { organizationName: 'EcoFuture Initiative' },
       status: 'Published'
     },
@@ -43,19 +43,19 @@ export const getDemoEvents = () => {
       startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       maxVolunteers: 15,
       currentVolunteers: 5,
-      images: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=800'],
+      images: ['/bootcamp.png'],
       ngo: { organizationName: 'Tech for Good Foundation' },
       status: 'Published'
     }
   ];
   
-  localStorage.setItem('demo_events', JSON.stringify(initial));
+  localStorage.setItem('demo_events_v2', JSON.stringify(initial));
   return initial;
 };
 
 export const updateDemoEventStatus = (id: string, status: string) => {
   const events = getDemoEvents();
   const updated = events.map((e: any) => e.id === id ? { ...e, status } : e);
-  localStorage.setItem('demo_events', JSON.stringify(updated));
+  localStorage.setItem('demo_events_v2', JSON.stringify(updated));
   return updated;
 };
