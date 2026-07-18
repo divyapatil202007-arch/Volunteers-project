@@ -63,6 +63,15 @@ export function AIRecommendations() {
       }
     };
     fetchEvents();
+
+    // Listen for cross-tab realtime updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'demo_events') {
+        setEvents(getDemoEvents());
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleApply = async (eventId: string | number) => {

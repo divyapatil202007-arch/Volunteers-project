@@ -30,6 +30,15 @@ export function Events() {
       }
     };
     fetchEvents();
+
+    // Listen for cross-tab realtime updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'demo_events') {
+        setEvents(getDemoEvents());
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const CATEGORIES = ['All', 'Environment', 'Education', 'Health', 'Community', 'Animal Welfare', 'Technology'];

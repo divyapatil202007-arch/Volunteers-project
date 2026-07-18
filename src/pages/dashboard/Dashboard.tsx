@@ -113,6 +113,15 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchEvents();
+
+    // Listen for cross-tab realtime updates (e.g. from NGO Dashboard)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'demo_events') {
+        setEvents(getDemoEvents().slice(0, 3));
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const fetchEvents = async () => {
