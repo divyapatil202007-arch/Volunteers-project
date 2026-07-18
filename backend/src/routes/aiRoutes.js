@@ -24,7 +24,7 @@ router.post('/chat', async (req, res) => {
     User says: ${message}`;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
     });
     
@@ -64,7 +64,7 @@ router.post('/analyze-resume', async (req, res) => {
     ${text}`;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
     });
     
