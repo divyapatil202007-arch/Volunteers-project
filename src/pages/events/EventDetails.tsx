@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 import { api } from '@/lib/api';
+import { getDemoEvents } from '@/lib/demoData';
 
 export function EventDetails() {
   const { id } = useParams();
@@ -45,7 +46,13 @@ export function EventDetails() {
         setEventStatus(res.data.status);
         setLoading(false);
       } catch (err) {
-        console.error('Failed to fetch event details', err);
+        console.warn('Failed to fetch event details from API, attempting mock fallback', err);
+        const mockEvents = getDemoEvents();
+        const mockEvent = mockEvents.find((e: any) => e.id === id || e.id === Number(id));
+        if (mockEvent) {
+          setEvent(mockEvent);
+          setEventStatus(mockEvent.status || 'Active');
+        }
         setLoading(false);
       }
     };
