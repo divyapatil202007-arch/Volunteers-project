@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, Zap, Sparkles, CheckSquare, Star, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Clock, Calendar, Zap, CheckSquare, Star, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 import { 
   Chart as ChartJS, 
   CategoryScale, 

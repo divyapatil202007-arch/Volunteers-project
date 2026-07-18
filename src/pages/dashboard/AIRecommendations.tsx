@@ -2,9 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Sparkles, Filter, MapPin, Calendar, Clock, ArrowLeft, 
-  ChevronDown, Search, CheckCircle2, Bookmark, Share2, Users, Star, 
-  Zap, Heart, Award
+  Sparkles, MapPin, Calendar, Clock, ArrowLeft, 
+  Search, CheckCircle2, Users, Zap
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useResume } from '@/context/ResumeContext';
@@ -72,7 +71,7 @@ export function AIRecommendations() {
 
   // AI Matching Engine
   const recommendations: Recommendation[] = useMemo(() => {
-    const userSkills = resumeData?.skills?.map(s => s.name.toLowerCase()) || 
+    const userSkills = resumeData?.skills?.map((s: any) => s.name.toLowerCase()) || 
       ['environment', 'community', 'teamwork', 'communication', 'sustainability', 'teaching', 'code'];
     const userLocation = 'NY';
 
@@ -87,7 +86,7 @@ export function AIRecommendations() {
       const eventSkills = (event.requiredSkills || '').toLowerCase().split(',').map((s: string) => s.trim());
       eventSkills.push((event.category || '').toLowerCase());
       
-      const matchedSkills = userSkills.filter(s => eventSkills.some((es: string) => es.includes(s) || s.includes(es)));
+      const matchedSkills = userSkills.filter((s: string) => eventSkills.some((es: string) => es.includes(s) || s.includes(es)));
       
       if (matchedSkills.length > 0) {
         score += (matchedSkills.length * 20);
@@ -130,7 +129,7 @@ export function AIRecommendations() {
     if (searchTerm) {
       result = result.filter(r => 
         r.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        r.organizer.toLowerCase().includes(searchTerm.toLowerCase())
+        (r.ngo?.organizationName || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 

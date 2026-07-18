@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useState, useCallback, useContext, type ReactNode } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 
 import { api } from '@/lib/api';
@@ -135,4 +135,12 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
       {children}
     </ResumeContext.Provider>
   );
+}
+
+export function useResume() {
+  const context = useContext(ResumeContext);
+  if (context === undefined) {
+    throw new Error('useResume must be used within a ResumeProvider');
+  }
+  return context;
 }
