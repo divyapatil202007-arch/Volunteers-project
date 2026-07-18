@@ -15,7 +15,6 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
 import { getDemoEvents } from '@/lib/demoData';
 import { api } from '@/lib/api';
 

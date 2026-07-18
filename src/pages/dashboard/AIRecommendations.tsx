@@ -20,6 +20,7 @@ interface Recommendation {
   maxVolunteers: number;
   currentVolunteers: number;
   images: string[];
+  status?: string;
   requiredSkills: string;
   ngo?: {
     organizationName: string;
