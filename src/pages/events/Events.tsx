@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Users, Calendar as CalendarIcon, Filter, ArrowRight } from 'lucide-react';
+import { Search, MapPin, Users, Calendar as CalendarIcon, Filter, ArrowRight, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getDemoEvents } from '@/lib/demoData';
 
 export function Events() {
   const navigate = useNavigate();
@@ -23,50 +24,7 @@ export function Events() {
         }
       } catch (err) {
         console.warn('Failed to fetch events or empty, using emergency fallback', err);
-        setEvents([
-          {
-            id: 'mock-1',
-            title: 'GreenTech Sustainability Hackathon',
-            description: 'Join developers and environmentalists to build software solutions for climate change. We need mentors and coders!',
-            category: 'Technology',
-            requiredSkills: 'Code, Environment, Sustainability, Teamwork, Communication',
-            location: 'Tech Hub, Brooklyn, NY',
-            startDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            maxVolunteers: 40,
-            currentVolunteers: 12,
-            images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800'],
-            ngo: { organizationName: 'Tech for Good Foundation' },
-            status: 'Published'
-          },
-          {
-            id: 'mock-2',
-            title: 'Urban Community Garden Setup',
-            description: 'Help us transform an empty lot into a thriving community garden. Physical labor and teamwork required.',
-            category: 'Environment',
-            requiredSkills: 'Environment, Community, Physical Labor, Teamwork',
-            location: 'Queens Community Center, NY',
-            startDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-            maxVolunteers: 25,
-            currentVolunteers: 20,
-            images: ['https://images.unsplash.com/photo-1416879598553-568393e1a067?auto=format&fit=crop&q=80&w=800'],
-            ngo: { organizationName: 'EcoFuture Initiative' },
-            status: 'Published'
-          },
-          {
-            id: 'mock-3',
-            title: 'Youth Coding Bootcamp Mentor',
-            description: 'Teach basic HTML/CSS and Python to high school students in a weekend bootcamp.',
-            category: 'Education',
-            requiredSkills: 'Teaching, Code, Communication, Empathy',
-            location: 'Bronx Library Center, NY',
-            startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-            maxVolunteers: 15,
-            currentVolunteers: 5,
-            images: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=800'],
-            ngo: { organizationName: 'Tech for Good Foundation' },
-            status: 'Published'
-          }
-        ]);
+        setEvents(getDemoEvents());
       } finally {
         setLoading(false);
       }
@@ -165,10 +123,15 @@ export function Events() {
                     style={{ backgroundImage: `url(${event.title === 'City Park Cleanup Drive' ? '/city_park_cleanup.png' : event.images?.[0] || event.image || 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=400&h=200'})` }}
                   />
                   <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-700" />
-                  <div className="absolute bottom-3 left-3">
+                  <div className="absolute bottom-3 left-3 flex gap-2">
                     <span className={`text-[10px] font-mono tracking-wider uppercase px-2.5 py-1 rounded-md border shadow-sm backdrop-blur-sm ${getCategoryColor(event.category)}`}>
                       {event.category}
                     </span>
+                    {event.status === 'Cancelled' && (
+                      <span className="text-[10px] font-mono tracking-wider uppercase px-2.5 py-1 rounded-md border border-red-900/50 bg-red-950/80 text-red-400 shadow-sm backdrop-blur-sm flex items-center gap-1">
+                        <XCircle size={10} /> Cancelled
+                      </span>
+                    )}
                   </div>
                 </div>
                 
@@ -210,10 +173,11 @@ export function Events() {
                   <div className="mt-auto pt-4 border-t border-slate-800/50">
                     <button 
                       onClick={() => navigate(`/events/${event.id}`)}
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors shadow-sm active:scale-[0.98]"
+                      disabled={event.status === 'Cancelled'}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 bg-slate-950 border border-slate-800 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors shadow-sm ${event.status === 'Cancelled' ? 'text-slate-600 cursor-not-allowed' : 'text-slate-200 hover:bg-slate-800 active:scale-[0.98]'}`}
                     >
-                      View Details
-                      <ArrowRight size={14} />
+                      {event.status === 'Cancelled' ? 'Event Cancelled' : 'View Details'}
+                      {event.status !== 'Cancelled' && <ArrowRight size={14} />}
                     </button>
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useResume } from '@/context/ResumeContext';
+import { getDemoEvents } from '@/lib/demoData';
 
 interface Recommendation {
   id: string;
@@ -58,34 +59,7 @@ export function AIRecommendations() {
         }
       } catch (err) {
         console.warn('Failed to fetch events or empty, using emergency fallback', err);
-        setEvents([
-          {
-            id: 'mock-1',
-            title: 'GreenTech Sustainability Hackathon',
-            description: 'Join developers and environmentalists to build software solutions for climate change. We need mentors and coders!',
-            category: 'Technology',
-            requiredSkills: 'Code, Environment, Sustainability, Teamwork, Communication',
-            location: 'Tech Hub, Brooklyn, NY',
-            startDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            maxVolunteers: 40,
-            currentVolunteers: 12,
-            images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800'],
-            ngo: { organizationName: 'Tech for Good Foundation' }
-          },
-          {
-            id: 'mock-2',
-            title: 'Urban Community Garden Setup',
-            description: 'Help us transform an empty lot into a thriving community garden. Physical labor and teamwork required.',
-            category: 'Environment',
-            requiredSkills: 'Environment, Community, Physical Labor, Teamwork',
-            location: 'Queens Community Center, NY',
-            startDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-            maxVolunteers: 25,
-            currentVolunteers: 20,
-            images: ['https://images.unsplash.com/photo-1416879598553-568393e1a067?auto=format&fit=crop&q=80&w=800'],
-            ngo: { organizationName: 'EcoFuture Initiative' }
-          }
-        ]);
+        setEvents(getDemoEvents());
       }
     };
     fetchEvents();
@@ -345,7 +319,11 @@ export function AIRecommendations() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-3 mt-auto pt-4">
-                      {appliedEvents.has(rec.id) ? (
+                      {rec.status === 'Cancelled' ? (
+                        <Button disabled className="flex-1 bg-slate-800 text-slate-500 border border-slate-700 rounded-xl py-6 text-lg font-bold flex items-center justify-center gap-2 cursor-not-allowed">
+                          Event Cancelled
+                        </Button>
+                      ) : appliedEvents.has(rec.id) ? (
                         <Button disabled className="flex-1 bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30 rounded-xl py-6 text-lg font-bold flex items-center justify-center gap-2 cursor-not-allowed">
                           <CheckCircle2 size={24} /> Applied Successfully
                         </Button>

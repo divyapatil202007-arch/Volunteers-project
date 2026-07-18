@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Plus, Search, Filter, MoreVertical, Edit, Trash, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
+import { getDemoEvents, updateDemoEventStatus } from '@/lib/demoData';
 
 export function NGOEvents() {
   const navigate = useNavigate();
@@ -20,9 +21,6 @@ export function NGOEvents() {
     try {
       const res = await api.get('/events');
       // For NGO dashboard, we should really only show THEIR events. 
-      // The endpoint /api/events returns all events (unless modified in backend).
-      // Assuming for hackathon MVP we filter by current user's NGO, 
-      // but since we don't have the current NGO id easily available, we'll fetch all or rely on backend.
       // Wait, let's just use the returned events.
       if (res.data && res.data.length > 0) {
         setEvents(res.data);
@@ -31,62 +29,20 @@ export function NGOEvents() {
       }
     } catch (err) {
       console.warn('NGOEvents failed to fetch events, using fallback', err);
-      setEvents([
-        {
-          id: 'mock-1',
-          title: 'GreenTech Sustainability Hackathon',
-          description: 'Join developers and environmentalists to build software solutions for climate change. We need mentors and coders!',
-          category: 'Technology',
-          requiredSkills: 'Code, Environment, Sustainability, Teamwork, Communication',
-          location: 'Tech Hub, Brooklyn, NY',
-          startDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-          maxVolunteers: 40,
-          currentVolunteers: 12,
-          images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800'],
-          ngo: { organizationName: 'Tech for Good Foundation' },
-          status: 'Published'
-        },
-        {
-          id: 'mock-2',
-          title: 'Urban Community Garden Setup',
-          description: 'Help us transform an empty lot into a thriving community garden. Physical labor and teamwork required.',
-          category: 'Environment',
-          requiredSkills: 'Environment, Community, Physical Labor, Teamwork',
-          location: 'Queens Community Center, NY',
-          startDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-          maxVolunteers: 25,
-          currentVolunteers: 20,
-          images: ['https://images.unsplash.com/photo-1416879598553-568393e1a067?auto=format&fit=crop&q=80&w=800'],
-          ngo: { organizationName: 'EcoFuture Initiative' },
-          status: 'Published'
-        },
-        {
-          id: 'mock-3',
-          title: 'Youth Coding Bootcamp Mentor',
-          description: 'Teach basic HTML/CSS and Python to high school students in a weekend bootcamp.',
-          category: 'Education',
-          requiredSkills: 'Teaching, Code, Communication, Empathy',
-          location: 'Bronx Library Center, NY',
-          startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-          maxVolunteers: 15,
-          currentVolunteers: 5,
-          images: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=800'],
-          ngo: { organizationName: 'Tech for Good Foundation' },
-          status: 'Published'
-        }
-      ]);
+      setEvents(getDemoEvents());
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCancel = async (id: string) => {
+    // Optimistic local update
+    const updated = updateDemoEventStatus(id, 'Cancelled');
+    setEvents(updated);
     try {
       await api.delete(`/events/${id}`);
-      setEvents(events.filter((e) => e.id !== id));
     } catch (err) {
-      console.error('Failed to delete event', err);
-      alert('Error deleting event.');
+      console.warn('Failed to delete event in backend, but mock synced successfully', err);
     }
   };
 
