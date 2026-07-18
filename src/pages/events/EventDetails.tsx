@@ -5,7 +5,7 @@ import { Calendar, MapPin, Users, ArrowLeft, Info, CheckCircle2, Share2, Heart, 
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-import { MOCK_EVENTS } from '@/data/mockEvents';
+import { api } from '@/lib/api';
 
 export function EventDetails() {
   const { id } = useParams();
@@ -37,27 +37,19 @@ export function EventDetails() {
   };
 
   useEffect(() => {
-    // Simulate API fetch
     const fetchEvent = async () => {
       setLoading(true);
       try {
-        // Real implementation would fetch from /api/events/:id
-        const found = MOCK_EVENTS.find(e => e.id === id) || {
-          ...MOCK_EVENTS[0], 
-          id: id,
-          title: 'Sample Event Title',
-          description: 'This is a dynamically loaded event description. In a real application, this data would be fetched from your database using the event ID from the URL.'
-        };
-        setTimeout(() => {
-          setEvent(found);
-          setLoading(false);
-        }, 500);
+        const res = await api.get(`/events/${id}`);
+        setEvent(res.data);
+        setEventStatus(res.data.status);
+        setLoading(false);
       } catch (err) {
         console.error('Failed to fetch event details', err);
         setLoading(false);
       }
     };
-    fetchEvent();
+    if (id) fetchEvent();
   }, [id]);
 
   if (loading) {
@@ -163,24 +155,22 @@ export function EventDetails() {
                 <CheckCircle2 size={20} className="text-primary" /> Requirements
               </h2>
               <ul className="space-y-3">
-                {(event.requirements || ['Enthusiasm and a positive attitude!']).map((req: string, i: number) => (
-                  <li key={i} className="flex items-start gap-3 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
-                    <span>{req}</span>
-                  </li>
-                ))}
+                <li className="flex items-start gap-3 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span>Enthusiasm and a positive attitude!</span>
+                </li>
               </ul>
             </section>
 
-            {event.skills && (
+            {event.requiredSkills && (
               <section>
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                   <Award size={20} className="text-primary" /> Skills You'll Use
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {event.skills.map((skill: string, i: number) => (
+                  {event.requiredSkills.split(',').map((skill: string, i: number) => (
                     <span key={i} className="px-3 py-1.5 bg-primary/10 text-primary font-medium rounded-lg border border-primary/20">
-                      {skill}
+                      {skill.trim()}
                     </span>
                   ))}
                 </div>
@@ -326,7 +316,7 @@ export function EventDetails() {
                         className="w-14 h-14 rounded-full border-2 border-slate-100"
                       />
                       <div>
-                        <p className="font-bold text-slate-800">{event.organizer || 'Local Community NGO'}</p>
+                        <p className="font-bold text-slate-800">{event.ngo?.organizationName || 'Local Community NGO'}</p>
                         <p className="text-sm text-primary hover:underline cursor-pointer" onClick={() => setShowNgoProfileModal(true)}>View Profile</p>
                       </div>
                     </div>
@@ -404,7 +394,7 @@ export function EventDetails() {
                   className="w-24 h-24 rounded-full border-4 border-slate-100 dark:border-slate-800 object-cover"
                 />
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{event.organizer || 'Local Community NGO'}</h3>
+                  <h3 className="text-2xl font-bold text-slate-800 dark:text-white">{event.ngo?.organizationName || 'Local Community NGO'}</h3>
                   <p className="text-primary font-medium mt-1">Established 2010 • {event.category}</p>
                 </div>
               </div>
@@ -412,7 +402,7 @@ export function EventDetails() {
               <div>
                 <h4 className="font-bold text-slate-800 dark:text-white mb-2">About Us</h4>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {event.organizer} is dedicated to creating a positive impact in our community. We work tirelessly to support {event.category.toLowerCase()} initiatives, empower local residents, and build a stronger, more resilient society. Over the past decade, we have successfully mobilized thousands of volunteers for meaningful change.
+                  {event.ngo?.organizationName || 'Our NGO'} is dedicated to creating a positive impact in our community. We work tirelessly to support {event.category?.toLowerCase() || 'community'} initiatives, empower local residents, and build a stronger, more resilient society. Over the past decade, we have successfully mobilized thousands of volunteers for meaningful change.
                 </p>
               </div>
 
@@ -444,7 +434,7 @@ export function EventDetails() {
                   </li>
                   <li className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
                     <Info size={18} className="text-primary shrink-0" /> 
-                    <span>contact@{event.organizer?.toLowerCase().replace(/\s/g, '') || 'ngo'}.org</span>
+                    <span>contact@{event.ngo?.organizationName?.toLowerCase().replace(/\s/g, '') || 'ngo'}.org</span>
                   </li>
                 </ul>
               </div>

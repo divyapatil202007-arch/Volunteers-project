@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Users, Calendar as CalendarIcon, Filter, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -14,16 +15,8 @@ export function Events() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/events', {
-          headers: {
-            'Authorization': token ? `Bearer ${token}` : ''
-          }
-        });
-        const data = await res.json();
-        if (data.success && data.data) {
-          setEvents(data.data);
-        }
+        const res = await api.get('/events');
+        setEvents(res.data || []);
       } catch (err) {
         console.error('Failed to fetch events:', err);
       } finally {
@@ -32,69 +25,6 @@ export function Events() {
     };
     fetchEvents();
   }, []);
-
-  const allEvents = events.length > 0 ? events : [
-    {
-      id: 1,
-      title: 'City Park Cleanup Drive',
-      category: 'Environment',
-      startDate: new Date(Date.now() + 86400000 * 2).toISOString(),
-      location: 'Central City Park, NY',
-      currentVolunteers: 24,
-      maxVolunteers: 50,
-      images: ['https://images.unsplash.com/photo-1618477461853-cf6ed80fbea5?auto=format&fit=crop&q=80&w=600&h=400']
-    },
-    {
-      id: 2,
-      title: 'Tech Skills Workshop for Youth',
-      category: 'Education',
-      startDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-      location: 'Community Center Library',
-      currentVolunteers: 12,
-      maxVolunteers: 20,
-      images: ['https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=600&h=400']
-    },
-    {
-      id: 3,
-      title: 'Senior Citizen Health Camp',
-      category: 'Health',
-      startDate: new Date(Date.now() + 86400000 * 7).toISOString(),
-      location: 'Mercy General Hospital',
-      currentVolunteers: 45,
-      maxVolunteers: 100,
-      images: ['https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=600&h=400']
-    },
-    {
-      id: 4,
-      title: 'Neighborhood Food Drive',
-      category: 'Community',
-      startDate: new Date(Date.now() + 86400000 * 3).toISOString(),
-      location: 'Downtown Square',
-      currentVolunteers: 8,
-      maxVolunteers: 30,
-      images: ['https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=600&h=400']
-    },
-    {
-      id: 5,
-      title: 'Stray Animal Rescue & Care',
-      category: 'Animal Welfare',
-      startDate: new Date(Date.now() + 86400000 * 10).toISOString(),
-      location: 'Safe Paws Shelter',
-      currentVolunteers: 15,
-      maxVolunteers: 25,
-      images: ['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=600&h=400']
-    },
-    {
-      id: 6,
-      title: 'Open Source Coding Bootcamp',
-      category: 'Technology',
-      startDate: new Date(Date.now() + 86400000 * 14).toISOString(),
-      location: 'Virtual / Online',
-      currentVolunteers: 120,
-      maxVolunteers: 500,
-      images: ['https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=600&h=400']
-    }
-  ];
 
   const CATEGORIES = ['All', 'Environment', 'Education', 'Health', 'Community', 'Animal Welfare', 'Technology'];
 
@@ -110,10 +40,10 @@ export function Events() {
     }
   };
 
-  const displayEvents = allEvents.filter((ev: any) => {
+  const displayEvents = events.filter((ev: any) => {
     const matchesSearch = ev.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          ev.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          ev.category.toLowerCase().includes(searchQuery.toLowerCase());
+                          (ev.location && ev.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                          (ev.category && ev.category.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory === 'All' || ev.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });

@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useNavigate } from 'react-router-dom';
-import { NGO_EVENTS } from '../ngo-dashboard/NGOEvents';
+import { api } from '@/lib/api';
 
 const STEPS = [
   'Basic Info',
@@ -21,35 +21,48 @@ export function CreateEvent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [eventData, setEventData] = useState({
     title: '',
+    category: 'Environment',
+    description: '',
+    requiredSkills: '',
+    minAge: '18',
+    providedEquipment: '',
     date: '',
-    time: ''
+    time: '',
+    location: '',
+    maxVolunteers: '50'
   });
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(s => s + 1);
     } else {
       setIsSubmitting(true);
-      triggerConfetti();
       
-      const newEvent = {
-        id: Date.now(),
-        title: eventData.title || 'Awesome Community Event',
-        date: eventData.date || 'TBD',
-        time: eventData.time || 'TBD',
-        location: 'TBD',
-        volunteers: 0,
-        capacity: 50,
-        status: 'Recruiting'
-      };
-      
-      const saved = localStorage.getItem('ngo_events');
-      const existing = saved ? JSON.parse(saved) : NGO_EVENTS;
-      localStorage.setItem('ngo_events', JSON.stringify([newEvent, ...existing]));
+      try {
+        const startDateStr = eventData.date && eventData.time ? `${eventData.date}T${eventData.time}:00` : new Date().toISOString();
+        const endDate = new Date(new Date(startDateStr).getTime() + 4 * 60 * 60 * 1000); // 4 hours later
 
-      setTimeout(() => {
-        navigate('/events');
-      }, 3000);
+        await api.post('/events', {
+          title: eventData.title || 'Awesome Community Event',
+          description: eventData.description || 'Description pending...',
+          category: eventData.category || 'Community',
+          requiredSkills: eventData.requiredSkills || 'None',
+          location: eventData.location || 'TBD',
+          startDate: startDateStr,
+          endDate: endDate.toISOString(),
+          maxVolunteers: parseInt(eventData.maxVolunteers) || 50,
+        });
+
+        triggerConfetti();
+        
+        setTimeout(() => {
+          navigate('/ngo-dashboard');
+        }, 3000);
+      } catch (err) {
+        console.error('Failed to create event', err);
+        alert('Error creating event. Please try again.');
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -146,7 +159,11 @@ export function CreateEvent() {
                   
                   <div className="col-span-1 space-y-2">
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Category</label>
-                    <select className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg py-3 px-4 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow">
+                    <select 
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg py-3 px-4 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+                      value={eventData.category}
+                      onChange={(e) => setEventData({...eventData, category: e.target.value})}
+                    >
                       <option>Environment</option>
                       <option>Education</option>
                       <option>Health</option>
@@ -157,7 +174,14 @@ export function CreateEvent() {
 
                   <div className="col-span-1 space-y-2">
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Maximum Volunteers</label>
-                    <Input icon={<Users size={18} />} type="number" placeholder="50" className="py-3" />
+                    <Input 
+                      icon={<Users size={18} />} 
+                      type="number" 
+                      placeholder="50" 
+                      className="py-3"
+                      value={eventData.maxVolunteers}
+                      onChange={(e) => setEventData({...eventData, maxVolunteers: e.target.value})}
+                    />
                   </div>
 
                   <div className="col-span-1 md:col-span-2 space-y-2">
@@ -165,6 +189,8 @@ export function CreateEvent() {
                     <textarea 
                       rows={5}
                       className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg py-3 px-4 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-shadow"
+                      value={eventData.description}
+                      onChange={(e) => setEventData({...eventData, description: e.target.value})}
                       placeholder="Describe the activities, goals, and what volunteers should expect..."
                     />
                   </div>
@@ -175,17 +201,33 @@ export function CreateEvent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                   <div className="col-span-1 md:col-span-2 space-y-2">
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Required Skills (Comma separated)</label>
-                    <Input placeholder="e.g. Heavy lifting, First Aid, Teaching" className="py-3" />
+                    <Input 
+                      placeholder="e.g. Heavy lifting, First Aid, Teaching" 
+                      className="py-3" 
+                      value={eventData.requiredSkills}
+                      onChange={(e) => setEventData({...eventData, requiredSkills: e.target.value})}
+                    />
                     <p className="text-xs text-slate-500 ml-1 mt-1">Our AI will match these skills with volunteer profiles.</p>
                   </div>
 
                   <div className="col-span-1 space-y-2">
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Minimum Age</label>
-                    <Input type="number" placeholder="18" className="py-3" />
+                    <Input 
+                      type="number" 
+                      placeholder="18" 
+                      className="py-3" 
+                      value={eventData.minAge}
+                      onChange={(e) => setEventData({...eventData, minAge: e.target.value})}
+                    />
                   </div>
                   <div className="col-span-1 space-y-2">
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Provided Equipment</label>
-                    <Input placeholder="e.g. Gloves, Trash Bags, Water" className="py-3" />
+                    <Input 
+                      placeholder="e.g. Gloves, Trash Bags, Water" 
+                      className="py-3" 
+                      value={eventData.providedEquipment}
+                      onChange={(e) => setEventData({...eventData, providedEquipment: e.target.value})}
+                    />
                   </div>
                 </div>
               )}
@@ -215,7 +257,13 @@ export function CreateEvent() {
 
                   <div className="col-span-1 md:col-span-2 space-y-2">
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Location Address</label>
-                    <Input icon={<MapPin size={18} />} placeholder="123 Central Park West, NY" className="py-3" />
+                    <Input 
+                      icon={<MapPin size={18} />} 
+                      placeholder="123 Central Park West, NY" 
+                      className="py-3"
+                      value={eventData.location}
+                      onChange={(e) => setEventData({...eventData, location: e.target.value})}
+                    />
                   </div>
 
                   <div className="col-span-1 md:col-span-2 mt-2 p-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-900/30 flex flex-col items-center justify-center text-slate-500 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors group">

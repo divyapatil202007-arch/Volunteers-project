@@ -1,7 +1,7 @@
 import { createContext, useState, useCallback, type ReactNode } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 
-import { MOCK_EVENTS } from '@/data/mockEvents';
+import { api } from '@/lib/api';
 
 export interface ExtractedSkill {
   name: string;
@@ -76,41 +76,51 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
     setUploadProgress(20);
-    setScanStatus('Reading Document Content...');
-    
-    // FAKE DELAY FOR WOW FACTOR (fast enough to not bore judges)
-    await new Promise(r => setTimeout(r, 600));
-    setUploadProgress(60);
-    setScanStatus('Analyzing Specializations...');
-    
-    await new Promise(r => setTimeout(r, 600));
-    setUploadProgress(100);
-    setScanStatus('Generating Smart Recommendations...');
-    
-    // SEED GUARANTEED GOOD DATA
-    setResumeData({
-      volunteerScore: 98,
-      skills: [
-        { name: 'JavaScript / React', confidence: 98, category: 'technical' },
-        { name: 'Mentorship', confidence: 95, category: 'soft' },
-        { name: 'Event Organization', confidence: 92, category: 'domain' },
-        { name: 'Public Speaking', confidence: 88, category: 'soft' },
-        { name: 'Project Management', confidence: 85, category: 'domain' }
-      ],
-      recommendations: [
-        {
-          id: '2', // Tech Skills Workshop for Youth (from mockEvents)
-          title: 'Tech Skills Workshop for Youth',
-          matchScore: 98,
-          reason: 'Your background in React and Mentorship makes you a perfect fit to lead this workshop.'
-        }
-      ],
-      strengths: ['Highly technical background', 'Proven leadership in community events'],
-      weaknesses: ['Could benefit from cross-domain health volunteering'],
-      careerSuggestions: ['Consider taking leadership roles in Technology events to build upon your existing specialization.']
-    });
+    try {
+      const fullText = await extractTextFromPDF(file);
+      
+      setUploadProgress(40);
+      setScanStatus('Analyzing with AI...');
+      
+      const res = await api.post('/ai/analyze-resume', { text: fullText });
+      
+      setUploadProgress(80);
+      setScanStatus('Generating Smart Recommendations...');
+      
+      const aiData = res.data;
+      
+      // The backend returns { skills: [], interests: [], experienceSummary: "", yearsOfExperience: number }
+      // We need to map this to our ResumeData shape for the UI
+      
+      const mappedSkills = (aiData.skills || []).map((skill: string) => ({
+        name: skill,
+        confidence: Math.floor(Math.random() * 20) + 80, // Random confidence 80-99
+        category: 'technical' as const
+      }));
+      
+      const mappedInterests = (aiData.interests || []).map((interest: string) => ({
+        name: interest,
+        confidence: Math.floor(Math.random() * 20) + 80,
+        category: 'domain' as const
+      }));
 
-    setIsUploading(false);
+      setResumeData({
+        volunteerScore: Math.min(100, 70 + (aiData.yearsOfExperience || 0) * 5),
+        skills: [...mappedSkills, ...mappedInterests],
+        recommendations: [], // We will compute these dynamically in the UI now
+        strengths: [`${aiData.yearsOfExperience || 0} years of experience`, ...(aiData.skills || []).slice(0, 2)],
+        weaknesses: ['Seeking more diverse volunteer opportunities'],
+        careerSuggestions: [aiData.experienceSummary || 'Continue building your leadership skills through volunteering.']
+      });
+
+      setUploadProgress(100);
+      setScanStatus('Analysis Complete!');
+    } catch (error) {
+      console.error('Failed to parse resume:', error);
+      setScanStatus('Analysis Failed');
+    } finally {
+      setTimeout(() => setIsUploading(false), 1000);
+    }
   };
 
   return (

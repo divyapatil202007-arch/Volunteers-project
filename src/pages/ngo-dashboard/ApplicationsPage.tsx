@@ -181,27 +181,25 @@ export function ApplicationsPage() {
             </div>
             
             <div className="px-8 pb-8 relative">
+              {/* Avatar overlaying banner */}
+              <div className="absolute -top-16 left-8 z-20">
+                <div className="w-32 h-32 rounded-full bg-slate-800 border-4 border-white dark:border-slate-900 flex items-center justify-center text-white text-5xl font-bold shadow-xl">
+                  {reviewApp.name.charAt(0)}
+                </div>
+                <div className="absolute bottom-2 right-2 bg-emerald-500 w-6 h-6 rounded-full border-4 border-white dark:border-slate-900 shadow-sm" title="Online"></div>
+              </div>
+
               {/* Profile Header Info */}
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-end gap-6">
-                  {/* Avatar overlaying banner */}
-                  <div className="relative shrink-0 -mt-16">
-                    <div className="w-32 h-32 rounded-full bg-slate-800 border-4 border-white dark:border-slate-900 flex items-center justify-center text-white text-5xl font-bold shadow-xl">
-                      {reviewApp.name.charAt(0)}
-                    </div>
-                    <div className="absolute bottom-2 right-2 bg-emerald-500 w-6 h-6 rounded-full border-4 border-white dark:border-slate-900 shadow-sm" title="Online"></div>
-                  </div>
-                  
-                  <div className="pb-2">
-                    <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">{reviewApp.name}</h2>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-                      <span className="flex items-center gap-1.5"><MapPin size={16} /> {reviewApp.location}</span>
-                      <span className="flex items-center gap-1.5"><Mail size={16} /> {reviewApp.email}</span>
-                      <span className="flex items-center gap-1.5"><Phone size={16} /> {reviewApp.phone}</span>
-                    </div>
+              <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-8 pt-20 lg:pt-0 lg:pl-40 relative z-10">
+                <div className="mt-2 lg:mt-0">
+                  <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">{reviewApp.name}</h2>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1.5"><MapPin size={16} /> {reviewApp.location}</span>
+                    <span className="flex items-center gap-1.5"><Mail size={16} /> {reviewApp.email}</span>
+                    <span className="flex items-center gap-1.5"><Phone size={16} /> {reviewApp.phone}</span>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-semibold border border-emerald-200 dark:border-emerald-800/50 sm:mb-2">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-semibold border border-emerald-200 dark:border-emerald-800/50">
                   <Sparkles size={16} /> {reviewApp.matchScore}% AI Match
                 </div>
               </div>

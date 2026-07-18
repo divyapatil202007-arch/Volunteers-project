@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Calendar, Zap, Sparkles, CheckSquare, Star, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 import { 
@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_EVENTS } from '@/data/mockEvents';
+import { api } from '@/lib/api';
 
 ChartJS.register(
   CategoryScale,
@@ -107,6 +107,20 @@ export function Dashboard() {
   const userName = localStorage.getItem('userName') || 'Volunteer';
   
   const [agenda, setAgenda] = useState(INITIAL_AGENDA);
+  const [events, setEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get('/events');
+      setEvents(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch events', err);
+    }
+  };
 
   const toggleTask = (id: number) => {
     setAgenda(prev => prev.filter(task => task.id !== id));
@@ -134,10 +148,10 @@ export function Dashboard() {
         </div>
         
         <button 
-          className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-indigo-500 transition-colors active:scale-95 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors active:scale-95 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
           onClick={() => navigate('/recommendations')}
         >
-          <Zap size={16} className="text-amber-400" /> 
+          <Zap size={16} className="text-yellow-300" /> 
           AI Recommended Opportunities
         </button>
       </div>
@@ -249,23 +263,25 @@ export function Dashboard() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="col-span-1 md:col-span-2 p-6 bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/40 rounded-xl flex flex-col shadow-sm cursor-pointer hover:border-indigo-500/30 transition-all group"
+          className="col-span-1 md:col-span-2 p-6 bg-gradient-to-br from-primary/10 to-slate-900 border border-primary/20 rounded-xl flex flex-col shadow-sm cursor-pointer hover:border-primary/50 transition-all group"
           onClick={() => navigate('/recommendations')}
         >
           <div className="flex justify-between items-start mb-6">
             <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
-              <Zap size={16} className="text-amber-400" />
+              <Zap size={16} className="text-yellow-300" />
               Top AI Matches For You
             </h3>
-            <span className="text-indigo-400 group-hover:translate-x-1 transition-transform">
+            <span className="text-primary group-hover:translate-x-1 transition-transform">
               <ArrowRight size={16} />
             </span>
           </div>
           
           <div className="flex-1 flex flex-col justify-center gap-4">
-            {MOCK_EVENTS.slice(0, 2).map((event, idx) => (
-              <div key={event.id} className="flex items-center gap-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800/50">
-                <div className="w-12 h-12 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/20 font-bold">
+            {events.length === 0 ? (
+              <div className="text-slate-500 text-sm">No matches found.</div>
+            ) : events.slice(0, 2).map((event: any, idx: number) => (
+              <div key={event.id} className="flex items-center gap-4 bg-slate-900/50 p-3 rounded-lg border border-slate-800/50 group-hover:border-primary/30 transition-colors">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20 font-bold">
                   {98 - (idx * 5)}%
                 </div>
                 <div>

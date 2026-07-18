@@ -37,12 +37,37 @@ export const protect = async (req, res, next) => {
     if (!user) {
       const name = supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0];
       const role = supabaseUser.user_metadata?.role || 'volunteer';
+      
+      const createData = {
+        email: supabaseUser.email,
+        name: name,
+        role: role,
+      };
+
+      if (role === 'ngo' || role === 'admin') {
+        createData.ngo = {
+          create: {
+            organizationName: name,
+            registrationNumber: `REG-${Date.now()}`,
+            description: 'New NGO Organization',
+            address: 'To be updated'
+          }
+        };
+      } else {
+        createData.volunteerProfile = {
+          create: {
+            skills: '',
+            interests: '',
+            availability: '',
+            languages: '',
+            achievements: '',
+            badges: ''
+          }
+        };
+      }
+
       user = await prisma.user.create({
-        data: {
-          email: supabaseUser.email,
-          name: name,
-          role: role,
-        }
+        data: createData
       });
     }
 

@@ -2,46 +2,62 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, Plus, Search, Filter, MoreVertical, Edit, Trash, Users } from 'lucide-react';
-
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
-
-
-// Mock data for the NGO's events
-export const NGO_EVENTS = [
-  { id: 1, title: 'City Park Cleanup Drive', date: 'Jul 21, 2026', time: '09:00 AM', location: 'Central Park', volunteers: 45, capacity: 50, status: 'Active' },
-  { id: 2, title: 'Tech Skills Workshop for Youth', date: 'Jul 24, 2026', time: '02:00 PM', location: 'Community Center', volunteers: 20, capacity: 20, status: 'Full' },
-  { id: 3, title: 'Senior Citizen Health Camp', date: 'Aug 02, 2026', time: '10:00 AM', location: 'Town Hall', volunteers: 15, capacity: 100, status: 'Recruiting' },
-  { id: 4, title: 'Neighborhood Food Drive', date: 'Aug 10, 2026', time: '08:00 AM', location: 'Downtown Square', volunteers: 8, capacity: 30, status: 'Recruiting' },
-];
 
 export function NGOEvents() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
-
-  const [events, setEvents] = useState(() => {
-    const saved = localStorage.getItem('ngo_events');
-    return saved ? JSON.parse(saved) : NGO_EVENTS;
-  });
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('ngo_events', JSON.stringify(events));
-  }, [events]);
+    fetchEvents();
+  }, []);
 
-  const handleCancel = (id: number) => {
-    setEvents(events.map((event: any) => event.id === id ? { ...event, status: 'Cancelled' } : event));
+  const fetchEvents = async () => {
+    try {
+      const res = await api.get('/events');
+      // For NGO dashboard, we should really only show THEIR events. 
+      // The endpoint /api/events returns all events (unless modified in backend).
+      // Assuming for hackathon MVP we filter by current user's NGO, 
+      // but since we don't have the current NGO id easily available, we'll fetch all or rely on backend.
+      // Wait, let's just use the returned events.
+      setEvents(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch events', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    try {
+      await api.delete(`/events/${id}`);
+      setEvents(events.filter((e) => e.id !== id));
+    } catch (err) {
+      console.error('Failed to delete event', err);
+      alert('Error deleting event.');
+    }
+  };
+
+  const formatTime = (dateStr: string) => {
+    return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
     <div className="relative min-h-[calc(100vh-100px)] -m-6 p-8 overflow-hidden rounded-3xl bg-slate-900/40 border border-slate-800/50 shadow-2xl backdrop-blur-xl">
-      {/* Dynamic Background Effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse duration-10000" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse duration-7000" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto space-y-10 mt-2">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 border border-blue-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.2)]">
@@ -59,7 +75,6 @@ export function NGOEvents() {
           </Button>
         </div>
 
-        {/* Filters & Search */}
         <div className="p-4 flex flex-col sm:flex-row items-center gap-4 bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
           <div className="flex-1 w-full relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-400 w-5 h-5 transition-colors" />
@@ -81,7 +96,7 @@ export function NGOEvents() {
                   ? 'bg-blue-500/10 border border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)] focus:ring-2 focus:ring-blue-500/50' 
                   : 'bg-transparent border border-slate-700 hover:bg-slate-800 text-slate-300 focus:ring-2 focus:ring-slate-600'}`}
             >
-              {['All', 'Active', 'Recruiting', 'Full', 'Cancelled'].map((status) => (
+              {['All', 'Draft', 'Active', 'Full', 'Cancelled'].map((status) => (
                 <option key={status} value={status} className="bg-slate-900 text-slate-200 py-2">
                   {status === 'All' ? 'Filter by Status' : status}
                 </option>
@@ -95,73 +110,80 @@ export function NGOEvents() {
           </div>
         </div>
 
-        {/* Events Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {events
-          .filter((e: any) => e.title.toLowerCase().includes(searchTerm.toLowerCase()))
-          .filter((e: any) => filterStatus === 'All' || e.status === filterStatus)
-          .map((event: any, i: number) => (
-          <motion.div
-            key={event.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1, duration: 0.4 }}
-            className="group relative"
-          >
-            {/* Hover glowing border effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-indigo-500/0 group-hover:from-blue-500/20 group-hover:via-purple-500/20 group-hover:to-indigo-500/20 rounded-3xl blur-xl transition-all duration-500 -z-10 opacity-0 group-hover:opacity-100" />
-            
-            <div className="border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-7 transition-all duration-500 overflow-hidden h-full flex flex-col">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className={`text-2xl font-extrabold mb-1.5 transition-colors ${event.status === 'Cancelled' ? 'text-slate-500 line-through' : 'text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400'}`}>{event.title}</h3>
-                  <div className="flex items-center gap-3 text-sm text-slate-400 font-medium">
-                    <span>{event.date}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-                    <span>{event.time}</span>
+        {isLoading ? (
+          <div className="text-center text-slate-400 py-10">Loading events...</div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {events
+            .filter((e: any) => e.title.toLowerCase().includes(searchTerm.toLowerCase()))
+            .filter((e: any) => filterStatus === 'All' || e.status === filterStatus)
+            .map((event: any, i: number) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
+              className="group relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-indigo-500/0 group-hover:from-blue-500/20 group-hover:via-purple-500/20 group-hover:to-indigo-500/20 rounded-3xl blur-xl transition-all duration-500 -z-10 opacity-0 group-hover:opacity-100" />
+              
+              <div className="border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-7 transition-all duration-500 overflow-hidden h-full flex flex-col">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className={`text-2xl font-extrabold mb-1.5 transition-colors ${event.status === 'Cancelled' ? 'text-slate-500 line-through' : 'text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400'}`}>{event.title}</h3>
+                    <div className="flex items-center gap-3 text-sm text-slate-400 font-medium">
+                      <span>{formatDate(event.startDate)}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+                      <span>{formatTime(event.startDate)}</span>
+                    </div>
                   </div>
+                  <Button variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                    <MoreVertical size={20} />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                  <MoreVertical size={20} />
-                </Button>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-4 mb-8 text-sm">
-                <div className="flex items-center gap-2 text-slate-300 bg-slate-800/50 border border-slate-700/50 px-4 py-2 rounded-xl shadow-inner">
-                  <Users size={16} className="text-blue-400" />
-                  <span className="font-bold text-white">{event.volunteers}</span> / {event.capacity} Volunteers
+                
+                <div className="flex flex-wrap items-center gap-4 mb-8 text-sm">
+                  <div className="flex items-center gap-2 text-slate-300 bg-slate-800/50 border border-slate-700/50 px-4 py-2 rounded-xl shadow-inner">
+                    <Users size={16} className="text-blue-400" />
+                    <span className="font-bold text-white">{event.currentVolunteers || 0}</span> / {event.maxVolunteers} Volunteers
+                  </div>
+                  <span className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold border shadow-sm
+                    ${event.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-emerald-500/10' : ''}
+                    ${event.status === 'Full' ? 'bg-slate-800 text-slate-300 border-slate-700 shadow-slate-900' : ''}
+                    ${event.status === 'Draft' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-blue-500/10' : ''}
+                    ${event.status === 'Cancelled' ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-red-500/10' : ''}
+                  `}>
+                    {event.status === 'Cancelled' ? 'CANCELLED' : (event.status || 'Active')}
+                  </span>
                 </div>
-                <span className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold border shadow-sm
-                  ${event.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-emerald-500/10' : ''}
-                  ${event.status === 'Full' ? 'bg-slate-800 text-slate-300 border-slate-700 shadow-slate-900' : ''}
-                  ${event.status === 'Recruiting' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-blue-500/10' : ''}
-                  ${event.status === 'Cancelled' ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-red-500/10' : ''}
-                `}>
-                  {event.status === 'Cancelled' ? 'CANCELLED' : event.status}
-                </span>
+                
+                <div className="mt-auto flex gap-4">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-12 rounded-xl gap-2 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-500 transition-all duration-300 hover:-translate-y-0.5"
+                    onClick={() => alert('Edit feature placeholder for API')}
+                  >
+                    <Edit size={18} /> Edit Details
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => handleCancel(event.id)}
+                    disabled={event.status === 'Cancelled'}
+                    className="flex-1 h-12 rounded-xl gap-2 border-slate-700 text-red-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:-translate-y-0.5"
+                  >
+                    <Trash size={18} /> {event.status === 'Cancelled' ? 'Cancelled' : 'Delete Event'}
+                  </Button>
+                </div>
               </div>
-              
-              <div className="mt-auto flex gap-4">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 h-12 rounded-xl gap-2 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-500 transition-all duration-300 hover:-translate-y-0.5"
-                  onClick={() => navigate('/events/create')}
-                >
-                  <Edit size={18} /> Edit Details
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleCancel(event.id)}
-                  disabled={event.status === 'Cancelled'}
-                  className="flex-1 h-12 rounded-xl gap-2 border-slate-700 text-red-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:-translate-y-0.5"
-                >
-                  <Trash size={18} /> {event.status === 'Cancelled' ? 'Cancelled' : 'Cancel Event'}
-                </Button>
-              </div>
+            </motion.div>
+          ))}
+          {events.length === 0 && (
+            <div className="text-slate-400 col-span-2 text-center py-12 border border-slate-800 border-dashed rounded-3xl">
+              No events found. Create your first event!
             </div>
-          </motion.div>
-        ))}
-      </div>
+          )}
+        </div>
+        )}
       </div>
     </div>
   );
