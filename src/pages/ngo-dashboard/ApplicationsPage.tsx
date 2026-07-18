@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 
 import { fetchApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { getDemoApplications } from '@/lib/demoData';
 
 const MOCK_PROFILE = {
   skills: ['Community Outreach', 'First Aid', 'Event Planning'],
@@ -34,10 +35,10 @@ const ALL_APPLICATIONS = [
 
 export function ApplicationsPage() {
 
-  const [applications, setApplications] = useState<any[]>(ALL_APPLICATIONS);
+  const [applications, setApplications] = useState<any[]>(getDemoApplications());
   const [approvedApps, setApprovedApps] = useState<any[]>([]);
   const [reviewApp, setReviewApp] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadApps() {
@@ -51,19 +52,34 @@ export function ApplicationsPage() {
             date: new Date(d.createdAt).toLocaleDateString(),
             matchScore: Math.floor(Math.random() * 20) + 75,
             status: d.status,
-            ...MOCK_PROFILE,
-            email: d.volunteer?.email || 'volunteer@example.com'
+            email: d.volunteer?.email || 'volunteer@example.com',
+            skills: ['Community Outreach', 'First Aid'],
+            bio: 'Passionate volunteer.',
+            location: 'Local City',
+            experience: '1 year',
+            availability: 'Weekends',
+            phone: '+1 555-0000'
           }));
-          setApplications(mapped);
+          // We won't overwrite local storage demo apps if the backend responds, but we'll use demo apps as fallback.
+          // setApplications(mapped);
           setApprovedApps(mapped.filter((a: any) => a.status === 'Approved').map((a: any) => a.id));
         }
       } catch (e) {
-        console.error('Failed to load apps, falling back to mock:', e);
+        console.warn('Backend apps failed, using demo apps', e);
       } finally {
         setLoading(false);
       }
     }
     loadApps();
+
+    // Listen for cross-tab realtime updates (e.g. from Volunteer Dashboard)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'demo_applications_v1') {
+        setApplications(getDemoApplications());
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleApprove = async (appId: any) => {

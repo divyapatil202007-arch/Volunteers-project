@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 import { api } from '@/lib/api';
-import { getDemoEvents } from '@/lib/demoData';
+import { getDemoEvents, addDemoApplication } from '@/lib/demoData';
 
 export function EventDetails() {
   const { id } = useParams();
@@ -273,7 +273,12 @@ export function EventDetails() {
                     <Button 
                       size="lg" 
                       className={`w-full font-bold text-lg shadow-lg ${joined ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-primary hover:bg-primary/90 text-white shadow-primary/30'}`}
-                      onClick={() => setJoined(!joined)}
+                      onClick={() => {
+                        if (!joined) {
+                          addDemoApplication(event.title);
+                        }
+                        setJoined(!joined);
+                      }}
                     >
                       {joined ? (
                         <>
