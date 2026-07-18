@@ -116,7 +116,7 @@ export function Dashboard() {
 
     // Listen for cross-tab realtime updates (e.g. from NGO Dashboard)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'demo_events') {
+      if (e.key === 'demo_events_v3') {
         setEvents(getDemoEvents().slice(0, 3));
       }
     };

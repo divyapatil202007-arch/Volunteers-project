@@ -33,7 +33,7 @@ export function Events() {
 
     // Listen for cross-tab realtime updates
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'demo_events') {
+      if (e.key === 'demo_events_v3') {
         setEvents(getDemoEvents());
       }
     };
@@ -129,7 +129,7 @@ export function Events() {
                 <div className="relative w-full h-48 overflow-hidden border-b border-slate-800">
                   <div 
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
-                    style={{ backgroundImage: `url(${event.title === 'City Park Cleanup Drive' ? '/city_park_cleanup.png' : event.images?.[0] || event.image || 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=400&h=200'})` }}
+                    style={{ backgroundImage: `url('${event.title === 'City Park Cleanup Drive' ? '/city_park_cleanup.png' : event.images?.[0] || event.image || 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=400&h=200'}')` }}
                   />
                   <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-700" />
                   <div className="absolute bottom-3 left-3 flex gap-2">
