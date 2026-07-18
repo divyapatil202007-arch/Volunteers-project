@@ -1,5 +1,5 @@
 export const getDemoEvents = () => {
-  const stored = localStorage.getItem('demo_events_v2');
+  const stored = localStorage.getItem('demo_events_v3');
   if (stored) {
     return JSON.parse(stored);
   }
@@ -49,13 +49,13 @@ export const getDemoEvents = () => {
     }
   ];
   
-  localStorage.setItem('demo_events_v2', JSON.stringify(initial));
+  localStorage.setItem('demo_events_v3', JSON.stringify(initial));
   return initial;
 };
 
 export const updateDemoEventStatus = (id: string, status: string) => {
   const events = getDemoEvents();
   const updated = events.map((e: any) => e.id === id ? { ...e, status } : e);
-  localStorage.setItem('demo_events_v2', JSON.stringify(updated));
+  localStorage.setItem('demo_events_v3', JSON.stringify(updated));
   return updated;
 };
