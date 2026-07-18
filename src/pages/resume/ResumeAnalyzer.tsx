@@ -1,4 +1,4 @@
-import { FileText, CheckCircle2, ArrowRight } from 'lucide-react';
+import { FileText, CheckCircle2, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { UploadArea } from '../../components/resume/UploadArea';
 import { SkillRadarChart } from '../../components/resume/SkillRadarChart';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 
 export function ResumeAnalyzer() {
   const navigate = useNavigate();
-  const { isUploading, resumeData, resetAnalyzer } = useResume();
+  const { isUploading, resumeData, errorMessage, resetAnalyzer } = useResume();
 
   return (
     <div className="flex flex-col gap-10 max-w-5xl mx-auto py-8 font-sans">
@@ -36,6 +36,22 @@ export function ResumeAnalyzer() {
             <div className="flex flex-col items-center gap-6 animate-pulse">
               <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-[0_0_20px_rgba(59,130,246,0.2)]" />
               <p className="text-slate-400 font-medium tracking-wide">Processing Document with AI...</p>
+            </div>
+          ) : errorMessage ? (
+            <div className="flex flex-col items-center gap-6 max-w-md text-center bg-red-950/20 border border-red-900/50 p-8 rounded-2xl">
+              <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center">
+                <AlertTriangle size={32} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-red-400 mb-2">Analysis Failed</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-6">{errorMessage}</p>
+                <Button 
+                  onClick={resetAnalyzer}
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl"
+                >
+                  Try Again
+                </Button>
+              </div>
             </div>
           ) : (
             <UploadArea />

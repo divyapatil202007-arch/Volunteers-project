@@ -30,6 +30,7 @@ interface ResumeContextType {
   uploadProgress: number;
   scanStatus: string;
   resumeData: ResumeData | null;
+  errorMessage: string | null;
   handleFileUpload: (file: File) => Promise<void>;
   resetAnalyzer: () => void;
 }
@@ -46,11 +47,13 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [scanStatus, setScanStatus] = useState('');
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const resetAnalyzer = useCallback(() => {
     setResumeData(null);
     setUploadProgress(0);
     setScanStatus('');
+    setErrorMessage(null);
     setIsUploading(false);
   }, []);
 
@@ -75,6 +78,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
+    setErrorMessage(null);
     setUploadProgress(20);
     try {
       const fullText = await extractTextFromPDF(file);
@@ -115,9 +119,10 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
 
       setUploadProgress(100);
       setScanStatus('Analysis Complete!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to parse resume:', error);
       setScanStatus('Analysis Failed');
+      setErrorMessage(error.message || 'Failed to analyze resume. Please try again.');
     } finally {
       setTimeout(() => setIsUploading(false), 1000);
     }
@@ -129,6 +134,7 @@ export function ResumeProvider({ children }: { children: ReactNode }) {
       uploadProgress, 
       scanStatus, 
       resumeData, 
+      errorMessage,
       handleFileUpload, 
       resetAnalyzer 
     }}>
